@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>던파 경매장 시스템 아키텍처</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Title */
+        .title-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .main-title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.125rem;
+        }
+
+        /* Box Component */
+        .box-container {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .box {
+            background: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-color: white;
+        }
+
+        .box-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .box-icon {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .box-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .box-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .box-items {
+            list-style: none;
+        }
+
+        .box-items li {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .bullet {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.25rem;
+        }
+
+        /* Layouts */
+        .center-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .box-full {
+            width: 100%;
+            max-width: 48rem;
+        }
+
+        .box-medium {
+            width: 24rem;
+        }
+
+        .connection-line {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .line-single {
+            width: 4px;
+            height: 3rem;
+            background: linear-gradient(to bottom, #60a5fa, #34d399);
+            border-radius: 9999px;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+        }
+
+        .line-multiple {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .line {
+            width: 4px;
+            height: 3rem;
+            border-radius: 9999px;
+        }
+
+        .line-purple {
+            background: linear-gradient(to bottom, #34d399, #a78bfa);
+        }
+
+        .line-red {
+            background: linear-gradient(to bottom, #34d399, #ef4444);
+        }
+
+        .line-orange {
+            background: linear-gradient(to bottom, #34d399, #f97316);
+        }
+
+        .line-yellow {
+            background: linear-gradient(to bottom, #34d399, #facc15);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        /* Docker Section */
+        .docker-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1));
+            backdrop-filter: blur(8px);
+            border-radius: 1rem;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .docker-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .docker-title {
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .docker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .docker-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .docker-card-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .docker-card-content {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .docker-note {
+            margin-top: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+        }
+
+        /* Legend */
+        .legend {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-title {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-text {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Info Tooltip */
+        .info-tooltip {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 20rem;
+            display: none;
+        }
+
+        .info-tooltip.active {
+            display: block;
+        }
+
+        .info-tooltip p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+        }
+
+        /* Color Variables */
+        .gradient-cyan { --gradient-from: #06b6d4; --gradient-to: #2563eb; }
+        .gradient-green { --gradient-from: #10b981; --gradient-to: #059669; }
+        .gradient-purple { --gradient-from: #a855f7; --gradient-to: #7c3aed; }
+        .gradient-red { --gradient-from: #ef4444; --gradient-to: #b91c1c; }
+        .gradient-orange { --gradient-from: #f97316; --gradient-to: #ea580c; }
+        .gradient-yellow { --gradient-from: #eab308; --gradient-to: #d97706; }
+        .gradient-pink { --gradient-from: #ec4899; --gradient-to: #e11d48; }
+
+        .color-cyan { color: #22d3ee; }
+        .color-green { color: #34d399; }
+        .color-purple { color: #a78bfa; }
+        .color-blue { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Title -->
+        <div class="title-section">
+            <h1 class="main-title">던파 경매장 시스템 아키텍처</h1>
+            <p class="subtitle">Real-time Auction System Architecture</p>
+        </div>
+
+        <!-- Frontend Layer -->
+        <div class="center-box">
+            <div class="box-container box-medium" data-info="frontend">
+                <div class="box gradient-cyan">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">Next.js Frontend</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>⚡ SSR (Server-Side Rendering)</span></li>
+                        <li><span class="bullet">•</span> <span>🔄 TanStack Query (API 캐싱)</span></li>
+                        <li><span class="bullet">•</span> <span>📡 WebSocket (실시간 알림)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Line -->
+        <div class="connection-line">
+            <div class="line-single"></div>
+        </div>
+
+        <!-- API Gateway Layer -->
+        <div class="center-box">
+            <div class="box-container box-medium" data-info="gateway">
+                <div class="box gradient-green">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">Spring Boot API Gateway</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>🔐 JWT Authentication</span></li>
+                        <li><span class="bullet">•</span> <span>⏱️ Rate Limiting</span></li>
+                        <li><span class="bullet">•</span> <span>🔄 API Proxy (던파 API)</span></li>
+                        <li><span class="bullet">•</span> <span>📊 Request Logging & Monitoring</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Lines - Multiple -->
+        <div class="line-multiple">
+            <div class="line line-purple"></div>
+            <div class="line line-red"></div>
+            <div class="line line-orange"></div>
+            <div class="line line-yellow"></div>
+        </div>
+
+        <!-- Data & Services Layer -->
+        <div class="grid grid-4">
+            <div class="box-container" data-info="postgres">
+                <div class="box gradient-purple">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">PostgreSQL</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>👤 사용자 데이터</span></li>
+                        <li><span class="bullet">•</span> <span>💰 경매 히스토리</span></li>
+                        <li><span class="bullet">•</span> <span>📈 통계 데이터</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box-container" data-info="redis">
+                <div class="box gradient-red">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">Redis</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>⚡ 실시간 캐싱</span></li>
+                        <li><span class="bullet">•</span> <span>🔥 세션 관리</span></li>
+                        <li><span class="bullet">•</span> <span>📊 Rate Limit 저장</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box-container" data-info="dnf-api">
+                <div class="box gradient-orange">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">던파 API</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>🎮 캐릭터 정보</span></li>
+                        <li><span class="bullet">•</span> <span>🪙 경매장 데이터</span></li>
+                        <li><span class="bullet">•</span> <span>⏰ 5분마다 크롤링</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box-container" data-info="ai">
+                <div class="box gradient-yellow">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">AI API</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>🤖 Claude/OpenAI</span></li>
+                        <li><span class="bullet">•</span> <span>📊 캐릭터 비교 분석</span></li>
+                        <li><span class="bullet">•</span> <span>💡 추천 시스템</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Workers -->
+        <div class="center-box">
+            <div class="box-container box-full" data-info="workers">
+                <div class="box gradient-pink">
+                    <div class="box-header">
+                        <div class="box-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="box-title">Background Workers</h3>
+                    </div>
+                    <ul class="box-items">
+                        <li><span class="bullet">•</span> <span>🤖 Auction Crawler (@Scheduled)</span></li>
+                        <li><span class="bullet">•</span> <span>🚨 Price Alert (실시간 모니터링)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Docker Infrastructure -->
+        <div class="docker-section">
+            <div class="docker-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <h3 class="docker-title">🐳 Docker Container Architecture</h3>
+            </div>
+            <div class="docker-grid">
+                <div class="docker-card">
+                    <div class="docker-card-title color-cyan">📦 Frontend Container</div>
+                    <div class="docker-card-content">
+                        • Image: node:20-alpine<br>
+                        • Port: 3000<br>
+                        • Volume: /app
+                    </div>
+                </div>
+                <div class="docker-card">
+                    <div class="docker-card-title color-green">📦 Backend Container</div>
+                    <div class="docker-card-content">
+                        • Image: openjdk:17-slim<br>
+                        • Port: 8080<br>
+                        • Network: bridge
+                    </div>
+                </div>
+                <div class="docker-card">
+                    <div class="docker-card-title color-purple">📦 Database Containers</div>
+                    <div class="docker-card-content">
+                        • PostgreSQL: 5432<br>
+                        • Redis: 6379<br>
+                        • Volume: persistent
+                    </div>
+                </div>
+            </div>
+            <div class="docker-note">
+                💡 All services run in isolated Docker containers with docker-compose orchestration
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3 class="legend-title">📌 기술 스택</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #06b6d4;"></div>
+                    <span class="legend-text">Frontend: Next.js 14</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #10b981;"></div>
+                    <span class="legend-text">Backend: Spring Boot 3</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #a855f7;"></div>
+                    <span class="legend-text">Database: PostgreSQL</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #ef4444;"></div>
+                    <span class="legend-text">Cache: Redis</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Tooltip -->
+        <div class="info-tooltip" id="tooltip">
+            <p id="tooltip-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const tooltipData = {
+            'frontend': '사용자 인터페이스를 담당하는 프론트엔드 레이어입니다.',
+            'gateway': 'API 요청을 중계하고 인증을 처리하는 게이트웨이입니다.',
+            'postgres': '영구 데이터를 저장하는 메인 데이터베이스입니다.',
+            'redis': '빠른 응답을 위한 인메모리 캐시 시스템입니다.',
+            'dnf-api': '던전앤파이터 공식 API와 통신합니다.',
+            'ai': 'AI를 활용한 캐릭터 분석 및 추천 기능입니다.',
+            'workers': '백그라운드에서 실행되는 작업 프로세스들입니다.'
+        };
+
+        const tooltip = document.getElementById('tooltip');
+        const tooltipText = document.getElementById('tooltip-text');
+        const boxes = document.querySelectorAll('.box-container');
+
+        boxes.forEach(box => {
+            box.addEventListener('mouseenter', function() {
+                const info = this.getAttribute('data-info');
+                if (tooltipData[info]) {
+                    tooltipText.textContent = tooltipData[info];
+                    tooltip.classList.add('active');
+                }
+            });
+
+            box.addEventListener('mouseleave', function() {
+                tooltip.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
