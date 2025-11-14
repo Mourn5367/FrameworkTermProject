@@ -1,18 +1,40 @@
+import Image from 'next/image';
+
 export default function Footer() {
   return (
-    <footer className="mt-10 mb-6 text-center">
-      <div className="flex justify-center gap-6 mb-3">
-        <a href="#" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">
-          로고
-        </a>
-        <a href="#" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">
+    <footer className="mt-10 mb-6 text-center px-4">
+      <div className="flex justify-center items-center gap-6 mb-4 flex-wrap">
+        <Image
+          src="/images/logo.png"
+          alt="DunSight"
+          width={120}
+          height={32}
+          className="opacity-60"
+        />
+        <span className="text-gray-400">|</span>
+        <Image
+          src="/images/neople-logo.png"
+          alt="Powered by OpenAPI"
+          width={100}
+          height={24}
+          className="opacity-60"
+        />
+        <span className="text-gray-400">|</span>
+        <a
+          href="#"
+          className="text-sm text-gray-600 hover:text-[#3DB89E] transition-colors font-medium"
+        >
           개인정보 처리 방침
         </a>
-        <a href="#" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">
-          건의사항 링크
+        <span className="text-gray-400">|</span>
+        <a
+          href="#"
+          className="text-sm text-gray-600 hover:text-[#3DB89E] transition-colors font-medium"
+        >
+          건의사항
         </a>
       </div>
-      <p className="text-gray-500 text-xs">© 2025 DnF Insight. All rights reserved.</p>
+      <p className="text-gray-500 text-xs">© 2025 DunSight. All rights reserved.</p>
     </footer>
   );
 }

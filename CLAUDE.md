@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ 중요: 프로젝트 경로 설정
+
+**이 프로젝트는 WSL 환경에서 작업합니다.**
+
+- **프로젝트 루트**: `/home/aisw/Next_Spring/`
+- **백엔드**: `/home/aisw/Next_Spring/backend/`
+- **프론트엔드**: `/home/aisw/Next_Spring/frontend/`
+- **스크립트**: `/home/aisw/Next_Spring/scripts/`
+
+**❌ 사용하지 말 것**: `/mnt/d/03_Spring/Next_Spring/` (Windows 마운트 경로)
+**✅ 항상 사용**: `/home/aisw/Next_Spring/` (WSL 경로)
+
+모든 파일 읽기, 쓰기, 실행은 WSL 경로를 사용해야 합니다.
+
 ## 프로젝트 개요
 
 던파 인사이트(DnF Insight) - 던전앤파이터 캐릭터 분석 및 경매장 시세 트래커
@@ -73,86 +87,178 @@ cd backend
 
 ```
 frontend/
-├── app/                    # App Router 페이지
-│   ├── layout.tsx         # 루트 레이아웃 (헤더 제거됨)
-│   ├── page.tsx           # 메인 페이지 (검색, 시세 테이블)
-│   ├── dashboard/         # 대시보드 (계획)
-│   ├── characters/        # 캐릭터 관리 (계획)
-│   ├── auction/           # 경매장 (계획)
-│   └── ranking/           # 랭킹 (계획)
+├── app/
+│   ├── page.tsx                    # 메인 페이지
+│   ├── characters/[id]/page.tsx    # 캐릭터 상세 페이지
+│   ├── auction/page.tsx            # 경매장 페이지 (구현 중)
+│   └── globals.css                 # 전역 CSS 및 디자인 토큰
 ├── components/
-│   ├── layout/            # 레이아웃 컴포넌트
-│   ├── ui/                # 공통 UI 컴포넌트
-│   └── features/          # 기능별 컴포넌트
-│       ├── dashboard/
-│       ├── characters/
-│       ├── auction/
-│       └── ranking/
-├── lib/
-│   └── utils/
-│       └── cn.ts          # Tailwind class 유틸리티
-└── types/                 # TypeScript 타입 정의 (미구현)
+│   └── layout/
+│       ├── Header.tsx              # 헤더 (미사용)
+│       ├── Footer.tsx              # 푸터
+│       └── Logo.tsx                # 로고 전용 컴포넌트
+└── public/
+    └── images/
+        ├── logo.png                # DunSight 로고
+        ├── neople-logo.png         # 네오플 API 로고
+        └── fame-icon.png           # 명성 아이콘
 ```
-
-**중요:**
-- `app/layout.tsx`: 헤더 제거됨. 글로벌 레이아웃만 담당
-- `app/page.tsx`: 메인 페이지. Header 컴포넌트, 아이템 테이블, 크롤링 위젯 포함
-- `app/auction/page.tsx`: 경매장 페이지 (아코디언 방식 아이템 리스트, 차트 확장 영역)
-- `app/characters/[id]/page.tsx`: 캐릭터 상세 페이지 (명성, 장비 세트, VP 스킬 분석)
-- Hot Reload: `ENV WATCHPACK_POLLING=true` (Dockerfile.dev)
-
-**컴포넌트 구조:**
-- `components/layout/Header.tsx`: 로고 + 검색 섹션 (메인, 캐릭터 페이지에 사용)
-- `components/layout/Logo.tsx`: 로고만 (경매장 페이지에 사용)
-- `components/layout/Footer.tsx`: 공통 푸터 (모든 페이지)
 
 ### 백엔드 (Spring Boot)
 
 ```
 backend/src/main/java/com/dnf/insight/
 ├── config/
-│   ├── WebConfig.java         # CORS 설정
-│   └── MongoConfig.java       # MongoDB 설정
+│   ├── WebConfig.java              # CORS 설정
+│   ├── MongoConfig.java            # MongoDB 설정
+│   ├── RedisConfig.java            # Redis 설정 (API 키 관리 + 캐싱)
+│   ├── DnfApiConfig.java           # 던파 API 설정 (다중 키, Rate Limiting)
+│   └── WebClientConfig.java        # WebClient 설정 (API 호출용)
 ├── controller/
-│   └── HealthController.java  # /api/health 엔드포인트
-├── service/                   # 비즈니스 로직 (미구현)
-├── repository/                # MongoDB Repository (미구현)
-├── domain/                    # 엔티티 (미구현)
-├── dto/                       # DTO (미구현)
-├── exception/                 # 예외 처리 (미구현)
-└── util/                      # 유틸리티 (미구현)
+│   ├── HealthController.java       # /api/health 엔드포인트
+│   └── CharacterController.java    # /api/characters 엔드포인트 ✅
+├── service/
+│   ├── ApiKeyManager.java          # Redis 기반 API 키 관리 + Rate Limiting ✅
+│   ├── DnfApiClient.java           # WebClient 기반 던파 API 호출 ✅
+│   ├── CharacterService.java       # 캐릭터 검색/조회 (5분 캐싱) ✅
+│   └── TimelineAnalysisService.java # 타임라인 분석 (던전/시간대) ✅
+├── dto/
+│   ├── CharacterSearchResponse.java # 캐릭터 검색 응답 ✅
+│   ├── TimelineResponse.java        # 타임라인 응답 ✅
+│   ├── WeeklyDungeonStatus.java     # 주간 던전 현황 ✅
+│   └── PlayTimeAnalysis.java        # 접속 시간대 분석 ✅
+├── util/
+│   └── DungeonResetUtil.java        # 던전 리셋 시간 계산 (목요일 06시) ✅
+├── repository/                      # MongoDB Repository (미구현)
+├── domain/                          # 엔티티 (미구현)
+└── exception/                       # 예외 처리 (미구현)
 ```
 
-**주요 설정 (`application.yml`):**
-- MongoDB URI: `mongodb://admin:password123@mongodb:27017/dnf_insight`
-- Redis: `redis:6379`
-- 던파 API: `${DNF_API_KEY}`, `https://api.neople.co.kr`
-- JWT: `${JWT_SECRET}`, expiration 86400000ms
-- CORS: `http://localhost:3000`
+## 디자인 시스템 (frontend/app/globals.css)
 
-### 데이터베이스 구조 (계획)
+모든 색상, 폰트, 간격은 `globals.css`의 CSS 변수로 중앙 관리됩니다.
 
-**MongoDB Collections (미구현):**
-- `users`: 사용자 정보 및 즐겨찾기
-- `characters`: 캐릭터 스냅샷 (타임라인 포함)
-- `auction_items`: 현재 경매 매물
-- `auction_history`: 거래 내역 (중복 방지: `auctionNo + soldAt` unique)
-- `price_snapshots`: Time Series Collection (5분 간격 시세)
-- `user_watchlist`: 사용자별 관심 아이템
-- `ranking_cache`: 랭킹 캐시 (일 1회 갱신)
+### 브랜드 컬러
+```css
+--primary: #3DB89E           /* 청록색 - 메인 컬러 */
+--secondary-blue: #155DFC    /* 파란색 - 공지사항 */
+--secondary-purple: #6C63FF  /* 보라색 - 업데이트 */
+--background: #F5F7FA        /* 배경색 */
+```
 
-**크롤링 전략:**
-- 5분마다 경매장 API 호출
-- 10분 이상 API 응답 없으면 판매 완료로 간주
-- 중복 방지: `auction_no + sold_at` unique constraint
+### 폰트
+- **Primary**: Pretendard
+- **Fallback**: Noto Sans KR, sans-serif
+
+### 글씨 크기 (CSS 변수)
+```css
+--font-size-xs: 0.75rem      /* 12px */
+--font-size-sm: 0.875rem     /* 14px */
+--font-size-base: 1rem       /* 16px */
+--font-size-lg: 1.125rem     /* 18px */
+--font-size-xl: 1.25rem      /* 20px */
+--font-size-2xl: 1.5rem      /* 24px */
+--font-size-3xl: 1.875rem    /* 30px */
+--font-size-4xl: 2.25rem     /* 36px */
+```
+
+### 간격 (CSS 변수)
+```css
+--spacing-xs: 0.5rem
+--spacing-sm: 0.75rem
+--spacing-base: 1rem
+--spacing-lg: 1.5rem
+--spacing-xl: 2rem
+--spacing-2xl: 2.5rem
+--spacing-3xl: 3rem
+```
+
+### 컨테이너
+```css
+--container-max-width: 800px
+--container-padding: 2rem
+--card-padding: 1.5rem
+--border-radius: 12px
+```
+
+### 이미지 비율 (캐릭터 페이지)
+```css
+--character-photo-ratio: 7    /* 캐릭터 사진 */
+--job-illustration-ratio: 3   /* 직업 일러스트 */
+```
+
+**사용 예시:**
+```tsx
+<div style={{ background: 'var(--primary)' }}>
+<div style={{ flex: 'var(--character-photo-ratio)' }}>
+```
+
+## 현재 UI 구현 상태 (2025.01)
+
+### 1. 메인 페이지 (`/`)
+- **로고**: DunSight (청록색)
+- **검색 섹션**: 서버 선택 + 닉네임 입력 + 검색 버튼
+- **검색 탭**: "최근 검색", "닉네임 1", "닉네임 2", "닉네임 3", "닉네임 4" (클릭 시 언더라인)
+- **실시간 아이템 시세**: 테이블 (청록색 헤더)
+- **크롤링 데이터 위젯**: 아이콘 + 설명
+- **공지사항**: 파란색 헤더, 아코디언 (2개 기본 표시 + 더보기)
+- **업데이트 사항**: 보라색 헤더, 아코디언 (2개 기본 표시 + 더보기)
+- **푸터**: 로고 + 네오플 API 로고 + 링크
+
+### 2. 캐릭터 상세 페이지 (`/characters/[id]`)
+
+**캐릭터 정보 카드 (3열 레이아웃):**
+
+**1열 (왼쪽):**
+- 캐릭터 사진 (7 비율, 보라-핑크 그라데이션)
+- 직업 일러스트 (3 비율, 파랑-청록 그라데이션)
+
+**2열 (중간):**
+- 명성 72,500 (아이콘 포함)
+- EADG (닉네임): 플레이어123
+- 서버명: 카인
+- 모험단명: 모험단명
+- 길드명: 길드명
+- 접속 시간대 박스 (시계 그래프, 직업 일러스트와 같은 높이)
+
+**3열 (오른쪽):**
+- 주간 던전 목록 (전체 높이 사용)
+- 상급던전 0/2, 배누스 1/1, 나벨 전투역 0/0, 이스트 황혼전 0/1
+- 금주 먹은 등급 (파란색 박스)
+- 전주 먹은 등급 (보라색 박스)
+
+**세트, 방어구, 무기 융합석 아코디언 (파란색 헤더):**
+- 3단 그리드: 선호 세트 / 방어구 융합석 조합 / 무기 융합석
+- 각 항목: 이름 - 80%
+- 우측 하단: 직업 일러스트 플레이스홀더
+
+**악세, 특장 융합석 아코디언 (보라색 헤더):**
+- 3단 그리드: 팔찌 융합석 / 목걸이 융합석 / 반지 융합석
+- 각 컬럼 하단: 특수 융합석 조합, 특수 융합석, 악세 융합석 조합
+
+### 3. Sticky Footer
+- `body`: `display: flex`, `flex-direction: column`, `min-height: 100vh`
+- `.page-wrapper`: `flex: 1`
+- Footer가 항상 화면 하단에 고정됨
 
 ## 환경 변수 설정
 
 `.env` 파일 생성 (`.env.example` 참고):
 
 ```bash
-# 던파 API (필수)
-DNF_API_KEY=your-neople-api-key-here
+# 던파 API (여러 키는 쉼표로 구분) ✅
+DNF_API_KEYS=key1,key2,key3
+DNF_API_BASE_URL=https://api.neople.co.kr
+DNF_IMAGE_BASE_URL=https://img-api.neople.co.kr
+
+# 던파 API Rate Limiting (네오플 기본값) ✅
+DNF_API_RATE_LIMIT_PER_SECOND=1000
+DNF_API_RATE_LIMIT_PER_MINUTE=60000
+DNF_API_RATE_LIMIT_PER_HOUR=3600000
+
+# 던파 API 캐시 설정 (초 단위) ✅
+DNF_API_CACHE_TIMELINE_TTL=300
+DNF_API_CACHE_CHARACTER_TTL=300
 
 # JWT (프로덕션 변경 필수)
 JWT_SECRET=your-jwt-secret-key-minimum-256-bits
@@ -163,6 +269,11 @@ NODE_ENV=development
 ```
 
 **던파 API 키 발급:** https://developers.neople.co.kr
+
+**네오플 API Rate Limiting:**
+- 1초당 최대: 1,000건
+- 1분당 최대: 60,000건
+- 1시간당 최대: 3,600,000건
 
 ## Docker Hot Reload 설정
 
@@ -185,15 +296,38 @@ volumes:
 
 ## API 엔드포인트
 
-### 현재 구현
+### 현재 구현 ✅
+
+**기본:**
 - `GET /api/health`: 헬스 체크
+
+**캐릭터 API:**
+- `GET /api/characters/search?serverId={serverId}&characterName={characterName}`: 캐릭터 검색 ✅
+- `GET /api/characters/{serverId}/{characterId}/weekly-dungeons`: 주간 던전 현황 ✅
+- `GET /api/characters/{serverId}/{characterId}/playtime`: 접속 시간대 패턴 ✅
+- `GET /api/characters/{serverId}/{characterId}/image?zoom={zoom}`: 캐릭터 이미지 URL ✅
+- `DELETE /api/characters/{serverId}/{characterId}/cache`: 캐시 무효화 ✅
+
+**테스트 예시:**
+```bash
+# 캐릭터 검색
+curl "http://localhost:8080/api/characters/search?serverId=casillas&characterName=EADG"
+
+# 주간 던전 현황
+curl "http://localhost:8080/api/characters/casillas/cb87f16da8475750d45ac9ea60ccab39/weekly-dungeons"
+
+# 접속 시간대
+curl "http://localhost:8080/api/characters/casillas/cb87f16da8475750d45ac9ea60ccab39/playtime"
+
+# 캐릭터 이미지 URL
+curl "http://localhost:8080/api/characters/casillas/cb87f16da8475750d45ac9ea60ccab39/image?zoom=1"
+```
 
 ### 계획된 엔드포인트
 ```
 # 캐릭터
 POST   /api/characters/favorite
 GET    /api/characters/dashboard
-GET    /api/characters/{id}/timeline
 GET    /api/characters/{id}/compare
 
 # 경매장
@@ -207,259 +341,311 @@ GET    /api/ranking/job/{jobId}
 GET    /api/ranking/analysis
 ```
 
-## 던파 API 통합 (미구현)
+## 던파 API 통합 ✅
 
-**주요 API:**
-- 캐릭터 검색/정보: `/df/servers/{serverId}/characters`
-- 타임라인: `/df/servers/{serverId}/characters/{characterId}/timeline`
+**구현된 API:**
+- ✅ 캐릭터 검색: `/df/servers/{serverId}/characters`
+- ✅ 타임라인 (next 토큰 지원): `/df/servers/{serverId}/characters/{characterId}/timeline`
+- ✅ 캐릭터 이미지: `https://img-api.neople.co.kr/df/servers/{serverId}/characters/{characterId}?zoom={zoom}`
+
+**미구현 API:**
 - 장착 장비: `/df/servers/{serverId}/characters/{characterId}/equip/equipment`
 - 경매장 검색: `/df/auction`
 - 경매장 시세: `/df/auction/{auctionNo}`
 - 랭킹: `/df/ranking/{rankingType}`
 
-**Rate Limiting:** API 키별 제한 확인 필요
+**Rate Limiting:** Redis Sliding Window 방식으로 구현 ✅
+- API 키별 1초/1분/1시간 단위 카운팅
+- 한도 초과 시 자동으로 다음 API 키로 전환
+
+## 데이터베이스 구조 (계획)
+
+**MongoDB Collections (미구현):**
+- `users`: 사용자 정보 및 즐겨찾기
+- `characters`: 캐릭터 스냅샷 (타임라인 포함)
+- `auction_items`: 현재 경매 매물
+- `auction_history`: 거래 내역 (중복 방지: `auctionNo + soldAt` unique)
+- `price_snapshots`: Time Series Collection (5분 간격 시세)
+- `user_watchlist`: 사용자별 관심 아이템
+- `ranking_cache`: 랭킹 캐시 (일 1회 갱신)
+
+**크롤링 전략:**
+- 5분마다 경매장 API 호출
+- 10분 이상 API 응답 없으면 판매 완료로 간주
+- 중복 방지: `auction_no + sold_at` unique constraint
+
+## UI 스타일 가이드
+
+### 색상 사용
+- **Primary (#3DB89E)**: 로고, 버튼, 테이블 헤더, 강조 색상
+- **Secondary Blue (#155DFC)**: 공지사항, 세트/방어구/무기 아코디언
+- **Secondary Purple (#6C63FF)**: 업데이트 사항, 악세/특장 아코디언
+
+### 아코디언 패턴
+```tsx
+const [expanded, setExpanded] = useState<number | null>(null);
+
+<div onClick={() => setExpanded(expanded === id ? null : id)}>
+  {/* 헤더 */}
+  <svg className={expanded === id ? 'rotate-180' : ''}>
+    {/* 화살표 아이콘 */}
+  </svg>
+</div>
+{expanded === id && (
+  <div>{/* 내용 */}</div>
+)}
+```
+
+### 더보기 버튼 패턴
+```tsx
+const [showAll, setShowAll] = useState(false);
+const displayed = showAll ? items : items.slice(0, 2);
+
+{items.length > 2 && (
+  <button onClick={() => setShowAll(!showAll)}>
+    {showAll ? '접기' : `더보기 (${items.length - 2}개)`}
+  </button>
+)}
+```
 
 ## 개발 중 주의사항
 
-1. **Frontend 디자인:**
-   - 시안 기준: `/메인_화면_시안.png`
-   - 현재 구현: 검색 섹션, 아이템 테이블, 크롤링 위젯
-   - 캐릭터/아이템 탭 제거됨
-   - Figma로 디자인 수정 예정
+1. **디자인 시스템 준수**:
+   - 모든 색상은 CSS 변수 사용 (`var(--primary)`)
+   - 직접 hex 코드 사용 금지 (유지보수 어려움)
+   - 폰트 크기도 CSS 변수 사용 권장
 
-2. **Backend:**
+2. **Backend**:
    - Spring Security 설정됨: 개발 시 인증 비활성화 또는 테스트 계정 사용
    - JWT 토큰 생성/검증 로직 미구현
    - 던파 API 클라이언트 미구현 (WebClient 사용 예정)
 
-3. **MongoDB:**
+3. **MongoDB**:
    - 초기화 스크립트 미작성 (`mongo-init/`)
    - Time Series Collection 설정 필요 (price_snapshots)
    - 인덱스 전략 수립 필요
 
-4. **Docker:**
+4. **Docker**:
    - Backend Dockerfile에서 Gradle Wrapper JAR 자동 다운로드
    - Frontend Hot Reload: `WATCHPACK_POLLING=true` 필수
 
-## UI 디자인 시스템
+## 커뮤니티 크롤러 시스템 (crawler/)
 
-### 전역 CSS 변수 (`app/globals.css`)
-모든 UI 크기와 스타일을 중앙에서 관리하는 CSS 변수 시스템 구현:
+**기술 스택:**
+- **FastAPI** - 비동기 웹 프레임워크
+- **Playwright** - 브라우저 자동화 (아카라이브 메인)
+- **Beautiful Soup** - HTML 파싱 (디시인사이드용)
+- **Motor** - 비동기 MongoDB 드라이버
+- **KoNLPy** - 한글 형태소 분석
+- **WordCloud** - 워드클라우드 생성
 
-```css
-:root {
-  --container-max-width: 800px;      /* 컨테이너 최대 너비 */
-  --container-padding: 2rem;
+### 크롤러 실행
 
-  /* 글씨 크기 (xs ~ 6xl) */
-  --font-size-base: 0.9rem;
+```bash
+# Docker (권장)
+docker-compose build crawler           # 이미지 빌드
+docker-compose up crawler               # API 서버 실행
 
-  /* 간격 (xs ~ 3xl) */
-  --spacing-base: 0.8rem;
+# 대량 크롤링 (500개 게시글)
+docker-compose run --rm crawler python crawl_500_posts.py
 
-  /* 카드/컨테이너 */
-  --card-padding: 1.2rem;
-  --border-radius: 0.75rem;
+# 워드클라우드 생성
+docker-compose run --rm crawler python make_wordcloud.py
+
+# 테스트 (Windows 로컬)
+cd D:\03_Spring\Next_Spring\crawler
+python test_playwright_arca.py         # Playwright 테스트
+python test_save_mongodb.py            # MongoDB 저장 테스트
+python test_comment_structure.py       # 댓글 계층 구조 테스트
+```
+
+### 크롤링 설정 (중앙 집중식)
+
+**모든 크롤링 설정은 `crawler/app/config/crawler_config.py`에서 관리:**
+
+```python
+class CrawlerConfig:
+    # 스케줄러 설정
+    scheduler = SchedulerSettings(
+        interval_minutes=60,      # ⭐ 크롤링 주기 (분)
+        run_on_startup=True,
+    )
+
+    # 디시인사이드 설정
+    dcinside = DCInsideSettings(
+        enabled=True,             # ⭐ 활성화/비활성화
+        max_pages=3,              # ⭐ 크롤링할 페이지 수
+        rate_limit_seconds=5,     # ⭐ 페이지 간 대기 시간
+        gallery_id="dfip"         # ⭐ 갤러리 ID
+    )
+
+    # 아카라이브 설정
+    arca = ArcaLiveSettings(
+        enabled=True,
+        max_pages=2,
+        rate_limit_seconds=10,    # Cloudflare 고려하여 느리게
+        board_id="dunfa",
+        use_cloudflare_bypass=True
+    )
+```
+
+**설정 변경 후 재시작 필수:**
+```bash
+docker-compose restart crawler
+```
+
+### 크롤러 아키텍처
+
+```
+crawler/
+├── app/
+│   ├── config/
+│   │   └── crawler_config.py           # 중앙 설정 파일
+│   ├── services/
+│   │   ├── dcinside_crawler.py         # 디시인사이드 (Beautiful Soup)
+│   │   └── arca_crawler_playwright.py  # 아카라이브 (Playwright) ⭐
+│   ├── models/
+│   │   └── post.py                     # CommunityPost, Comment 모델
+│   └── database.py                     # MongoDB 연결
+├── crawl_500_posts.py                  # 대량 크롤링 스크립트
+├── make_wordcloud.py                   # 워드클라우드 생성 스크립트
+├── test_save_mongodb.py                # MongoDB 저장 테스트
+└── Dockerfile                          # Java(KoNLPy) + Playwright 포함
+```
+
+### API 엔드포인트 (Crawler)
+
+```bash
+GET  /api/health                    # 헬스 체크
+GET  /api/posts?limit=100&hours=24  # 최근 게시글 조회
+POST /api/crawl/trigger?site=both   # 수동 크롤링 트리거
+GET  /api/stats                     # 크롤링 통계
+```
+
+### MongoDB Collections (추가)
+
+- `community_posts`: 크롤링된 커뮤니티 게시글
+  - URL 기준 중복 방지 (upsert)
+  - 인덱스: `url` (unique), `crawled_at`, `board_name`
+  - 댓글 계층 구조 지원 (depth, parent_id, replies)
+
+**데이터 구조:**
+```json
+{
+  "title": "게시글 제목",
+  "content": "본문 전문 (원본)",
+  "comments": [
+    {
+      "comment_id": "c_797444581",
+      "parent_id": null,
+      "depth": 0,
+      "author": "작성자",
+      "content": "댓글 내용 (원본)",
+      "replies": []
+    }
+  ]
 }
 ```
 
-### 전역 레이아웃 클래스
-- `.app-container`: 모든 페이지의 메인 컨테이너 (max-width 제한, 중앙 정렬)
-- `.page-wrapper`: Sticky Footer 구현을 위한 Flexbox 래퍼
-- Body는 `min-height: 100vh`로 설정되어 푸터가 항상 화면 하단에 위치
+### 크롤링 전략
 
-### Sticky Footer 패턴
-```jsx
-<div className="page-wrapper">
-  <div className="flex-1">
-    {/* 페이지 컨텐츠 */}
-  </div>
-  <Footer />  {/* 항상 하단에 고정 */}
-</div>
+**아카라이브 (dunfa 채널) - Playwright:**
+- `.list-area` 영역만 선택적 크롤링 (효율적)
+- 본문: `.article-body` 추출
+- 댓글: `.comment-item` 파싱
+- 대댓글 계층: `a[href*="#c_"]` 링크에서 parent_id 추출
+- Depth 자동 계산
+- Rate Limiting: 5초 간격 (페이지당)
+- 성공률: 95%+
+
+**디시인사이드 (dfip 갤러리) - Beautiful Soup:**
+- 빠르고 안정적
+- Rate Limiting: 5초 간격
+- 성공률: 100%
+
+**데이터 저장:**
+- 원본 그대로 MongoDB 저장 (전처리 X)
+- 전처리는 사용 시점에 수행 (유연성)
+- URL 기준 upsert로 중복 방지
+
+### 워드클라우드 및 데이터 분석
+
+**전처리 파이프라인:**
+1. MongoDB에서 원본 데이터 로드
+2. 텍스트 정규화 (URL, 이메일, 특수문자 제거)
+3. KoNLPy Okt로 명사 추출
+4. 불용어 제거 (ㅋㅋㅋ, 조사 등)
+5. WordCloud 생성 (`wordcloud_arca_dunfa.png`)
+6. 통계 저장 (`wordcloud_stats.txt`)
+
+**MongoDB → 다른 포맷 변환:**
+```python
+# JSON
+import json
+from pymongo import MongoClient
+posts = list(db.community_posts.find({}))
+json.dump(posts, f, ensure_ascii=False, default=str)
+
+# CSV (pandas)
+posts_df = pd.DataFrame(list(db.community_posts.find({})))
+posts_df.to_csv('posts.csv')
+
+# Parquet (ML용)
+df.to_parquet('posts.parquet', compression='gzip')
+
+# HuggingFace Dataset (LLM 학습용)
+from datasets import Dataset
+dataset = Dataset.from_list(posts)
+dataset.push_to_hub("your-username/arca-dunfa")
 ```
 
-## 현재 UI 구현 상태
+## 최근 구현 내역
 
-### 1. 메인 페이지 (`app/page.tsx`)
-**구현 완료:**
-- Header 컴포넌트 (로고 + 검색 섹션)
-  - 서버 선택 드롭다운 (카인, 디레지에, 시로코, 프레이, 카시야스)
-  - 닉네임 입력 필드
-  - 검색 버튼 (그라디언트 디자인)
-  - 최근 검색 목록 영역
-- 실시간 아이템 시세 테이블 (빈 행 2개)
-- 크롤링 데이터 위젯 (플레이스홀더)
-- **공지사항 섹션** (아코디언, 기본 2개 표시, 더보기 버튼)
-  - 제목, 날짜, 확장 가능한 본문
-  - 파란색 테마
-- **업데이트 사항 섹션** (아코디언, 기본 2개 표시, 더보기 버튼)
-  - 버전별 업데이트 (v1.2.0, v1.1.5 등)
-  - 날짜, 변경사항 목록 (줄바꿈 지원)
-  - 보라색 테마
-- Footer 컴포넌트 (하단 여백 포함)
+### 2025.01.13 - 커뮤니티 크롤러
+1. **Playwright 기반 아카라이브 크롤러**
+   - Windows/Docker 모두 지원
+   - 댓글 계층 구조 파싱 (parent_id, depth)
+   - 선택적 영역 크롤링 (`.list-area`만)
+   - 본문 + 댓글 전문 수집
 
-### 2. 경매장 페이지 (`app/auction/page.tsx`)
-**구현 완료:**
-- Logo 컴포넌트만 사용 (검색 없음)
-- 아코디언 방식 아이템 리스트 (축소된 크기)
-  - 아이템 정보: 아이콘, 이름, 카테고리, 현재 가격
-  - 가격 변동: 1주전 대비, 어제 대비 (퍼센트, 화살표)
-  - 확장/축소 버튼 (회전 애니메이션)
-- 확장 시 표시 영역:
-  - **가격 추이 차트** (플레이스홀더, h-48, 최저가/평균가/최대가)
-  - **등록 물량 테이블** (가격 오름차순, 최대 10개, text-xs)
-    - 컬럼: 등록시간, 물량, 가격, 개당
-    - 시간 표시: "10초 전", "2분 전", "1시간 전" 등
-    - 파란색 테마 (hover:bg-blue-50)
-  - **최근 거래 테이블** (최대 10개, text-xs)
-    - 컬럼: 거래시간, 물량, 가격, 개당
-    - 시간 표시: "5초 전", "1분 전", "30분 전" 등
-    - 녹색 테마 (hover:bg-green-50)
-- 2열 그리드로 나란히 배치
-- Footer 컴포넌트
+2. **대량 데이터 수집 시스템**
+   - `crawl_500_posts.py`: 50페이지 크롤링
+   - MongoDB 자동 중복 방지 (URL 기준 upsert)
+   - Rate limiting (5초/페이지)
 
-**샘플 데이터:**
-```typescript
-// 아이템 예시
-{ id: 1, icon: '⚔️', name: '누트럼 우측...', category: '장비 · 무기',
-  price: 12500000, weekAgoPrice: 11800000, yesterdayPrice: 12300000 }
+3. **한글 형태소 분석 및 워드클라우드**
+   - KoNLPy + WordCloud 통합
+   - Docker에 Java/나눔폰트 설치
+   - 전처리 파이프라인 구축
+   - Top 100 단어 통계 자동 생성
 
-// 등록 물량 예시
-{ time: '10초 전', quantity: 5, price: 62500000, unit: 12500000 }
+### 2025.11.13 - 던파 API 통합 ✅
 
-// 최근 거래 예시
-{ time: '5초 전', quantity: 2, price: 25000000, unit: 12500000 }
-```
+1. **API 키 관리 시스템**
+   - Redis 기반 다중 API 키 관리
+   - Sliding Window 방식 Rate Limiting (1초/1분/1시간)
+   - 한도 초과 시 자동 키 전환
 
-### 3. 캐릭터 상세 페이지 (`app/characters/[id]/page.tsx`)
-**구현 완료:**
-- Header 컴포넌트 (로고 + 검색)
-- **캐릭터 기본 정보 카드** (3열 그리드, 축소된 크기):
-  - **왼쪽:** 캐릭터 사진 (플레이스홀더, aspect-square)
-  - **중앙:**
-    - 명성 수치 (text-2xl)
-    - 닉네임, 서버, 모험단, 길드명 (text-sm)
-    - **접속 시간대 시각화**:
-      - SVG 원형 그래프 (w-24 h-24, 활동 시간 표시)
-      - 주요 활동 시간: 오후 6시 ~ 자정
-      - 평균 활동 시간: 6시간/일
-  - **오른쪽:**
-    - 주간 던전 목록 (상급던전, 배누스, 나벨, 이넬 황혼전, p-2)
-    - 금주 먹은 등급 개수 (레전더리, 에픽, 태초, text-xs)
-    - 저번 주 먹은 등급 개수 (text-xs)
+2. **캐릭터 검색 및 조회**
+   - WebClient 기반 비동기 API 호출
+   - 캐릭터 검색 (서버/닉네임)
+   - 캐릭터 이미지 URL 생성
 
-- **장비 세트 정보 카드** (3열 그리드, 명성 상위 100등 통계):
-  - **선호 장비 세트** (8개 아이템, 동적 높이 조정)
-    - 각 아이템별 사용률 퍼센트 표시 (85%, 82%, ..., text-sm)
-    - flex-1로 남은 공간 균등 분배 (min-h-[45px])
-    - gap-2, p-3
-  - **선호 무기** (8개, 동적 높이 조정)
-    - 무기별 사용률 퍼센트 표시 (80%, 76%, ..., text-sm)
-    - 동일한 높이 조정 로직
-  - **선호 VP 스킬** (8개 슬롯, space-y-2)
-    - 슬롯별 사용률 표시 (예: "VP 슬롯 1: 95% 사용", text-xs)
-    - 각 슬롯당 2개 스킬 비교:
-      - 스킬 1: 파란색 가로 막대 그래프 (h-1, 예: 65%)
-      - 스킬 2: 보라색 가로 막대 그래프 (h-1, 예: 35%)
+3. **타임라인 분석**
+   - 주간 던전 입장 현황 (목요일 06시 기준)
+   - 접속 시간대 패턴 분석 (최근 한 달)
+   - next 토큰 처리로 100개 이상 데이터 수집
 
-- Footer 컴포넌트
-
-**주요 기술 구현:**
-```typescript
-// 동적 높이 조정 (장비 세트/무기) - 컨테이너 높이에 맞춰 자동 조정
-<div className="flex-1 flex flex-col justify-between gap-2">
-  {[...Array(8)].map((_, i) => (
-    <div className="flex-1 min-h-[45px]">
-      {/* flex-1로 남은 공간 균등 분배 */}
-    </div>
-  ))}
-</div>
-
-// VP 스킬 가로 막대 그래프 (h-1로 축소)
-<div className="w-full bg-gray-200 rounded-full h-1">
-  <div
-    className="bg-gradient-to-r from-blue-500 to-blue-600 h-1 rounded-full"
-    style={{ width: `${percent1}%` }}
-  ></div>
-</div>
-```
-
-### 4. 레이아웃 컴포넌트
-
-**Header.tsx** (`components/layout/Header.tsx`):
-- 로고 (text-4xl) + 검색 섹션 통합
-- 서버 선택, 닉네임 입력, 검색 버튼 (text-sm, py-2.5)
-- 최근 검색 목록 영역 (text-xs)
-- 사용 페이지: 메인, 캐릭터 상세
-
-**Logo.tsx** (`components/layout/Logo.tsx`):
-- 로고만 표시 (text-4xl, 검색 없음)
-- 사용 페이지: 경매장
-
-**Footer.tsx** (`components/layout/Footer.tsx`):
-- 공통 푸터 (모든 페이지)
-- 하단 여백 (mb-6) 포함
-- 링크 (text-sm), 저작권 (text-xs)
-
-## UI 크기 조정 가이드
-
-전체 UI 크기를 조정하려면 `frontend/app/globals.css`의 CSS 변수를 수정:
-
-```css
-:root {
-  /* 컨테이너 너비 조정 (현재: 800px) */
-  --container-max-width: 1000px;
-
-  /* 글씨 크기 조정 */
-  --font-size-base: 1rem;      /* 현재: 0.9rem */
-  --font-size-sm: 0.9rem;      /* 현재: 0.8rem */
-
-  /* 간격 조정 */
-  --spacing-base: 1rem;        /* 현재: 0.8rem */
-}
-```
-
-## 최근 구현 사항 (2025.01)
-
-### UI 크기 최적화
-- 전역 CSS 변수 시스템 도입으로 일관된 크기 관리
-- 컨테이너 너비를 800px로 축소하여 한눈에 보기 쉽게 개선
-- 모든 텍스트 크기와 간격을 15% 축소 (scale-factor: 0.85)
-- 푸터를 Sticky Footer 패턴으로 구현 (항상 화면 하단 고정)
-
-### 메인 페이지 공지/업데이트 섹션
-- 아코디언 UI로 구현 (확장/축소 가능)
-- 기본 2개 항목만 표시, "더보기" 버튼으로 전체 표시
-- 공지사항: 파란색 테마, 본문 확장 가능
-- 업데이트: 보라색 테마, 버전별 업데이트 목록 (v1.2.0 등)
-- React useState로 독립적 상태 관리
-
-### 아코디언 패턴 사용처
-1. **경매장 페이지**: 아이템 클릭 시 차트 + 테이블 확장
-2. **메인 페이지**: 공지/업데이트 항목 클릭 시 본문 확장
-3. 공통 UI 패턴: 화살표 아이콘 회전, fadeIn 애니메이션
+4. **캐싱 전략**
+   - Redis 기반 5분 캐싱 (동일 캐릭터)
+   - 중복 API 호출 방지
 
 ## 다음 단계
 
-### UI/UX 개선
-1. 실제 차트 라이브러리 통합 (Recharts)
-2. 로딩 상태 및 에러 처리 UI
-3. 반응형 디자인 최적화 (모바일)
-
-### Backend 개발
-1. MongoDB 초기화 스크립트 작성
-2. 던파 API 클라이언트 구현 (WebClient)
-3. 도메인 엔티티 작성 (Character, AuctionItem 등)
-4. 경매장 크롤러 구현 (@Scheduled)
-5. API 엔드포인트 구현
-
-### Frontend-Backend 연동
-1. API 호출 로직 (Axios/TanStack Query)
-2. 실시간 데이터 바인딩
-3. 검색 기능 구현 (서버 + 닉네임)
-4. 즐겨찾기 및 최근 검색 기능 (localStorage)
-
-### LLM 통합
-1. Claude/OpenAI API 연동
-2. 캐릭터 비교 분석 프롬프트
-3. 빌드 추천 시스템
+1. ~~**던파 API 통합**: WebClient로 네오플 API 연동~~ ✅ 완료
+2. **장비 정보 API**: 캐릭터 장착 장비 조회 및 분석
+3. **경매장 API**: 실시간 시세 조회 및 히스토리 추적
+4. **MongoDB 스키마**: 캐릭터/타임라인 데이터 저장 구조
+5. **LLM 통합**: 크롤링 데이터 + 캐릭터 정보 기반 빌드 추천
+6. **RAG 시스템**: 벡터 DB + 검색 시스템
+7. **스케줄러**: 자동 크롤링 + 데이터 갱신

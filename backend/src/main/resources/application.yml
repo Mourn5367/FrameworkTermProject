@@ -2,6 +2,9 @@ spring:
   application:
     name: dnf-insight
 
+  main:
+    allow-bean-definition-overriding: true
+
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://admin:password123@localhost:27017/dnf_insight?authSource=admin}
@@ -22,8 +25,16 @@ server:
 # DnF API 설정
 dnf:
   api:
-    key: ${DNF_API_KEY:your-api-key-here}
+    keys: ${DNF_API_KEYS:PSmv35du3EfiXNEtzf2Gdy4P9yba2tSJ,3v70cQoFmRHByQ57lUlrvOleakSoVhqg,9QLL8xNgcmwcVBnKlVPFmzRa9uN2MFTU}
     base-url: ${DNF_API_BASE_URL:https://api.neople.co.kr}
+    image-base-url: ${DNF_IMAGE_BASE_URL:https://img-api.neople.co.kr}
+    rate-limit:
+      per-second: ${DNF_API_RATE_LIMIT_PER_SECOND:1000}
+      per-minute: ${DNF_API_RATE_LIMIT_PER_MINUTE:60000}
+      per-hour: ${DNF_API_RATE_LIMIT_PER_HOUR:3600000}
+    cache:
+      timeline-ttl: ${DNF_API_CACHE_TIMELINE_TTL:300}
+      character-ttl: ${DNF_API_CACHE_CHARACTER_TTL:300}
 
 # JWT 설정
 jwt:

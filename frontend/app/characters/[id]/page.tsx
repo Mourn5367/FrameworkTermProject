@@ -1,294 +1,307 @@
-import Header from '@/components/layout/Header';
+'use client';
+
+import Image from 'next/image';
 import Footer from '@/components/layout/Footer';
+import SearchSection from '@/components/search/SearchSection';
+import CharacterInfoCard, { CharacterInfo } from '@/components/character/CharacterInfoCard';
+import EquipmentAccordion, { EquipmentData } from '@/components/character/EquipmentAccordion';
 
 export default function CharacterDetailPage() {
+  const handleSearch = (server: string, nickname: string) => {
+    console.log('검색:', server, nickname);
+    // TODO: 캐릭터 검색 로직 구현
+  };
+
+  // 캐릭터 정보 데이터
+  const characterData: CharacterInfo = {
+    fame: 72500,
+    nickname: '플레이어123',
+    server: '카인',
+    adventureName: '모험단명',
+    guildName: '길드명',
+    connectionTime: {
+      hours: 6,
+      period: '오후 6시 ~ 자정'
+    },
+    weeklyDungeons: [
+      { name: '베누스', current: 1, max: 1 },
+      { name: '나벨 레이드', current: 0, max: 0 },
+      { name: '이내 황혼전', current: 0, max: 1 }
+    ],
+    currentWeekGrade: {
+      legendary: 0,
+      epic: 0,
+      ancient: 0
+    },
+    lastWeekGrade: {
+      legendary: 2,
+      epic: 5,
+      ancient: 1
+    }
+  };
+
+  // 세트, 방어구, 무기 융합석 데이터
+  const armorEquipmentSections: EquipmentData[] = [
+    {
+      title: '[검색 캐릭터 직업명] 선호 세트',
+      items: [
+        { name: '고대 던전의 발자취', percentage: 80 },
+        { name: '그랴자의 숨은 목걸', percentage: 80 },
+        { name: '미라의 영역', percentage: 80 },
+        { name: '무인 사냥의 끝자락', percentage: 80 },
+        { name: '새벽티타', percentage: 80 },
+        { name: '소홀 페어리', percentage: 80 },
+        { name: '암흑던전 저주', percentage: 80 },
+        { name: '에테르의 오브 이즈', percentage: 80 },
+        { name: '영원의 아이언하트 헬결판', percentage: 80 },
+        { name: '투롱영의 난', percentage: 80 },
+        { name: '컬트의 영문', percentage: 80 },
+        { name: '한재를 담아낸다', percentage: 80 }
+      ]
+    },
+    {
+      title: '[검색 캐릭터 직업명] 방어구 융합석 조합',
+      items: [
+        { name: '기술 * 5, 청향 * 0, 메선 * 0', percentage: 80 },
+        { name: '기술 * 4, 청향 * 1, 메선 * 0', percentage: 80 },
+        { name: '기술 * 4, 청향 * 0, 메선 * 1', percentage: 80 },
+        { name: '기술 * 3, 청향 * 2, 메선 * 0', percentage: 80 },
+        { name: '기술 * 3, 청향 * 0, 메선 * 2', percentage: 80 },
+        { name: '기술 * 3, 청향 * 1, 메선 * 1', percentage: 80 },
+        { name: '기술 * 2, 청향 * 2, 메선 * 1', percentage: 80 },
+        { name: '기술 * 2, 청향 * 1, 메선 * 2', percentage: 80 },
+        { name: '기술 * 2, 청향 * 3, 메선 * 0', percentage: 80 },
+        { name: '기술 * 1, 청향 * 4, 메선 * 0', percentage: 80 },
+        { name: '기술 * 1, 청향 * 0, 메선 * 4', percentage: 80 },
+        { name: '한재를 담아낸 에나딘다', percentage: 80 }
+      ]
+    },
+    {
+      title: '[검색 캐릭터 직업명] 무기 융합석',
+      items: [
+        { name: '기술', percentage: 80 },
+        { name: '확장', percentage: 80 },
+        { name: '배산', percentage: 80 },
+        { name: '세트', percentage: 80 }
+      ]
+    }
+  ];
+
+  // 무기 레벨링 추가 컨텐츠
+  const weaponLevelingContent = (
+    <div className="mt-6 pt-4 border-t border-gray-200">
+      <h4 className="text-xs font-bold text-gray-700 mb-2">[검색 캐릭터 직업명] 무기 레벨링</h4>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">세계권 빌리 기여</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">세계권 헬파잉 기여</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">세계권 융합석 기여</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+      </div>
+      <div className="mt-6 pt-4 border-t border-gray-200">
+      <h4 className="text-xs font-bold text-gray-700 mb-2">[검색 캐릭터 직업명] 칭호 레벨</h4>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">30 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">35 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">40 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">45 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">50 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+      </div>
+    </div>
+    </div>
+    
+  );
+    // 칭호 레벨링
+    const titleLevelingContent = (
+    <div className="mt-6 pt-4 border-t border-gray-200">
+      <h4 className="text-xs font-bold text-gray-700 mb-2">[검색 캐릭터 직업명] 칭호 레벨</h4>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">30 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">35 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">40 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">45 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+        <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+          <span className="text-xs text-gray-700">50 레벨</span>
+          <span className="text-sm font-bold text-blue-600">80%</span>
+        </div>
+      </div>
+    </div>
+  );
+  // 특수 융합석 조합 (팔찌)
+  const specialWeaponContent = (
+    <div className="mt-6 pt-4 border-t border-gray-200">
+      <h4 className="text-xs font-bold text-gray-700 mb-2">[검색 캐릭터 직업명] 특수 융합석 조합</h4>
+      <div className="space-y-2">
+        {['35 * 3', '35 * 2, 80 * 1', '단·구간 * 3', '35 * 2, 전 구간', '80 * 3', '75 * 3', '40 * 3', '60 * 3', '무기 1'].map((item, idx) => (
+          <div key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+            <span className="text-xs text-gray-700 font-medium">{item}</span>
+            <span className="text-sm font-bold text-blue-600">80%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // 특수 융합석 (목걸이)
+  const specialArmorContent = (
+    <div className="mt-6 pt-4 border-t border-gray-200">
+      <h4 className="text-xs font-bold text-gray-700 mb-2">[검색 캐릭터 직업명] 특수 융합석</h4>
+      <div className="space-y-2">
+        {['35 레벨', '40 레벨', '45 레벨', '60 레벨', '70 레벨', '75레벨', '80 레벨', '전 구간', '세트'].map((item, idx) => (
+          <div key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+            <span className="text-xs text-gray-700 font-medium">{item}</span>
+            <span className="text-sm font-bold text-blue-600">80%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // 악세 융합석 조합 (반지)
+  const specialRingContent = (
+    <div className="mt-6 pt-4 border-t border-gray-200">
+      <h4 className="text-xs font-bold text-gray-700 mb-2">[검색 캐릭터 직업명] 악세 융합석 조합</h4>
+      <div className="space-y-2">
+        {['35 * 3', '35 * 2, 80 * 1', '단·구간 * 3', '35 * 2, 전 구간', '80 * 3', '75 * 3', '40 * 3', '60 * 3', '무기 1'].map((item, idx) => (
+          <div key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+            <span className="text-xs text-gray-700 font-medium">{item}</span>
+            <span className="text-sm font-bold text-blue-600">80%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // 악세, 특장 융합석 데이터
+  const accessoryEquipmentSections: EquipmentData[] = [
+    {
+      title: '[검색 캐릭터 직업명] 팔찌 융합석',
+      items: [
+        { name: '국역', percentage: 80 },
+        { name: '무지', percentage: 80 },
+        { name: '양조', percentage: 80 },
+        { name: '태어나', percentage: 80 }
+      ],
+      additionalContent: specialWeaponContent
+    },
+    {
+      title: '[검색 캐릭터 직업명] 목걸이 융합석',
+      items: [
+        { name: '국역', percentage: 80 },
+        { name: '무지', percentage: 80 },
+        { name: '양조', percentage: 80 },
+        { name: '태어나', percentage: 80 }
+      ],
+      additionalContent: specialArmorContent
+    },
+    {
+      title: '[검색 캐릭터 직업명] 반지 융합석',
+      items: [
+        { name: '국역', percentage: 80 },
+        { name: '무지', percentage: 80 },
+        { name: '양조', percentage: 80 },
+        { name: '태어나', percentage: 80 }
+      ],
+      additionalContent: specialRingContent
+    }
+  ];
+
   return (
-    <div className="page-wrapper bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="page-wrapper" style={{ background: 'var(--background)' }}>
       <div className="flex-1">
-        <div className="app-container">
-          <Header />
-
-        {/* 캐릭터 기본 정보 */}
-        <div className="bg-white rounded-2xl shadow-xl mb-6 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3">
-            <h2 className="text-lg font-bold text-white">캐릭터 정보</h2>
+        <div className="app-container py-8">
+          {/* 로고 */}
+          <div className="text-center mb-6">
+            <Image
+              src="/images/logo.png"
+              alt="DunSight"
+              width={300}
+              height={80}
+              className="mx-auto"
+              priority
+            />
           </div>
 
-          <div className="p-5">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* 캐릭터 이미지 섹션 */}
-              <div className="flex flex-col gap-3">
-                {/* 캐릭터 사진 (7) */}
-                <div
-                  className="w-full bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl overflow-hidden relative"
-                  style={{ flex: 'var(--character-photo-ratio)' }}
-                >
-                  {/* 이미지가 없을 때 플레이스홀더 */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-3xl mb-1">📷</div>
-                      <p className="text-xs text-gray-600 font-medium">캐릭터 사진</p>
-                    </div>
-                  </div>
+          {/* 검색 섹션 */}
+          <SearchSection onSearch={handleSearch} />
 
-                  {/* 실제 이미지 영역 */}
-                  {/* <img
-                    src="/images/characters/character-photo.png"
-                    alt="캐릭터 사진"
-                    className="w-full h-full object-cover object-center"
-                  /> */}
-                </div>
+          {/* 캐릭터 정보 카드 */}
+          <CharacterInfoCard character={characterData} />
 
-                {/* 직업 일러스트 (3) */}
-                <div
-                  className="w-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl overflow-hidden relative"
-                  style={{ flex: 'var(--job-illustration-ratio)' }}
-                >
-                  {/* 이미지가 없을 때 플레이스홀더 */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-3xl mb-1">🎨</div>
-                      <p className="text-xs text-gray-600 font-medium">직업 일러스트</p>
-                    </div>
-                  </div>
+          {/* 세트, 방어구, 무기 융합석 아코디언 */}
+          <EquipmentAccordion
+            title="세트, 방어구, 무기 융합석"
+            headerColor="var(--secondary-blue)"
+            accentColor="#2563eb"
+            sections={armorEquipmentSections}
+            additionalContent={weaponLevelingContent}
+          />
 
-                  {/* 실제 이미지 영역 */}
-                  {/* <img
-                    src="/images/characters/job-illustration.png"
-                    alt="직업 일러스트"
-                    className="w-full h-full object-cover object-center"
-                  /> */}
-                </div>
-              </div>
-
-              {/* 캐릭터 정보 */}
-              <div className="space-y-4">
-                <div>
-                  <h2 className="text-lg font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-1">
-                    명성 수치
-                  </h2>
-                  <p className="text-2xl font-bold text-gray-800">12,500</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-600 mb-0.5">닉네임</h3>
-                    <p className="text-sm font-medium text-gray-800">플레이어123</p>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-600 mb-0.5">서버</h3>
-                    <p className="text-sm font-medium text-gray-800">카인</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-600 mb-0.5">모험단</h3>
-                    <p className="text-sm font-medium text-gray-800">모험단명</p>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-600 mb-0.5">길드명</h3>
-                    <p className="text-sm font-medium text-gray-800">길드명</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-gray-700 mb-3">접속 시간대</h3>
-                  <div className="flex items-center gap-4">
-                    {/* 시계 그래프 */}
-                    <div className="relative w-24 h-24 flex-shrink-0">
-                      <svg viewBox="0 0 100 100" className="transform -rotate-90">
-                        {/* 배경 원 */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="40"
-                          fill="none"
-                          stroke="#e5e7eb"
-                          strokeWidth="8"
-                        />
-                        {/* 활동 시간대 표시 (18시~24시 = 270도~360도) */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="40"
-                          fill="none"
-                          stroke="url(#gradient)"
-                          strokeWidth="8"
-                          strokeDasharray="62.83 188.5"
-                          strokeDashoffset="62.83"
-                          strokeLinecap="round"
-                        />
-                        <defs>
-                          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#3b82f6" />
-                            <stop offset="100%" stopColor="#a855f7" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      {/* 중앙 텍스트 */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            6시간
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 시간대 정보 */}
-                    <div>
-                      <p className="text-sm text-gray-700 font-medium mb-1">주요 활동 시간</p>
-                      <p className="text-xs text-gray-600">오후 6시 ~ 자정</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <span className="text-xs text-gray-500">평균 6시간/일</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 주간 던전 목록 */}
-              <div>
-                <h2 className="text-lg font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  주간 던전 목록
-                </h2>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-sm font-medium text-gray-700">상급던전</span>
-                    <span className="text-sm font-bold text-blue-600">0/2</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-sm font-medium text-gray-700">배누스</span>
-                    <span className="text-sm font-bold text-blue-600">0/1</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-sm font-medium text-gray-700">나벨</span>
-                    <span className="text-sm font-bold text-blue-600">0/1</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-sm font-medium text-gray-700">이넬 황혼전</span>
-                    <span className="text-sm font-bold text-blue-600">0/1</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
-                    <p className="text-xs text-gray-700">
-                      <span className="font-bold">금주 먹은 등급 개수:</span> 레전더리: 0개 | 에픽: 0개 | 태초: 0개
-                    </p>
-                  </div>
-                  <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
-                    <p className="text-xs text-gray-700">
-                      <span className="font-bold">저번 주 먹은 등급 개수:</span> 레전더리: 2개 | 에픽: 5개 | 태초: 1개
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 장비 세트 정보 */}
-        <div className="bg-white rounded-2xl shadow-xl mb-6 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">장비 세트</h2>
-            <p className="text-blue-100 text-xs">명성 상위 100등 통계</p>
-          </div>
-
-          <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* 선호 장비 세트 */}
-              <div className="border-2 border-gray-200 rounded-xl p-4 hover:border-blue-400 transition-colors flex flex-col">
-                <h3 className="font-bold text-sm text-gray-800 mb-3 text-center border-b border-gray-200 pb-2">
-                  [검색 캐릭터 직업명] 선호 장비 세트
-                </h3>
-                <div className="flex-1 flex flex-col justify-between gap-2">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg flex items-center justify-between px-3 py-3 flex-1 min-h-[45px]">
-                      <span className="text-gray-700 font-semibold text-xs">아이템 {i + 1}</span>
-                      <span className="text-blue-600 font-bold text-sm">{85 - i * 3}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 선호 무기 */}
-              <div className="border-2 border-gray-200 rounded-xl p-4 hover:border-blue-400 transition-colors flex flex-col">
-                <h3 className="font-bold text-sm text-gray-800 mb-3 text-center border-b border-gray-200 pb-2">
-                  [검색 캐릭터 직업명] 선호 무기
-                </h3>
-                <div className="flex-1 flex flex-col justify-between gap-2">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg flex items-center justify-between px-3 py-3 flex-1 min-h-[45px]">
-                      <span className="text-gray-700 font-semibold text-xs">무기 {i + 1}</span>
-                      <span className="text-blue-600 font-bold text-sm">{80 - i * 4}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 선호 VP 스킬 */}
-              <div className="border-2 border-gray-200 rounded-xl p-4 hover:border-blue-400 transition-colors flex flex-col">
-                <h3 className="font-bold text-sm text-gray-800 mb-3 text-center border-b border-gray-200 pb-2">
-                  [검색 캐릭터 직업명] 선호 VP 스킬
-                </h3>
-                <div className="space-y-2">
-                  {[
-                    { slot: 'VP 슬롯 1', slotPercent: 95, skill1: '스킬 A', percent1: 65, skill2: '스킬 B', percent2: 35 },
-                    { slot: 'VP 슬롯 2', slotPercent: 88, skill1: '스킬 C', percent1: 78, skill2: '스킬 D', percent2: 22 },
-                    { slot: 'VP 슬롯 3', slotPercent: 72, skill1: '스킬 E', percent1: 45, skill2: '스킬 F', percent2: 55 },
-                    { slot: 'VP 슬롯 4', slotPercent: 65, skill1: '스킬 G', percent1: 82, skill2: '스킬 H', percent2: 18 },
-                    { slot: 'VP 슬롯 5', slotPercent: 58, skill1: '스킬 I', percent1: 70, skill2: '스킬 J', percent2: 30 },
-                    { slot: 'VP 슬롯 6', slotPercent: 45, skill1: '스킬 K', percent1: 55, skill2: '스킬 L', percent2: 45 },
-                    { slot: 'VP 슬롯 7', slotPercent: 32, skill1: '스킬 M', percent1: 60, skill2: '스킬 N', percent2: 40 },
-                    { slot: 'VP 슬롯 8', slotPercent: 18, skill1: '스킬 O', percent1: 50, skill2: '스킬 P', percent2: 50 },
-                  ].map((data, i) => (
-                    <div key={i} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-bold text-gray-500">{data.slot}</span>
-                        <span className="text-xs font-bold text-green-600">{data.slotPercent}% 사용</span>
-                      </div>
-
-                      {/* 스킬 1 */}
-                      <div className="mb-1">
-                        <div className="flex justify-between items-center mb-0.5">
-                          <span className="text-xs font-medium text-gray-700">{data.skill1}</span>
-                          <span className="text-xs font-bold text-blue-600">{data.percent1}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1">
-                          <div
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-1 rounded-full transition-all"
-                            style={{ width: `${data.percent1}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      {/* 스킬 2 */}
-                      <div>
-                        <div className="flex justify-between items-center mb-0.5">
-                          <span className="text-xs font-medium text-gray-700">{data.skill2}</span>
-                          <span className="text-xs font-bold text-purple-600">{data.percent2}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1">
-                          <div
-                            className="bg-gradient-to-r from-purple-500 to-purple-600 h-1 rounded-full transition-all"
-                            style={{ width: `${data.percent2}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* 악세, 특장 융합석 아코디언 */}
+          <EquipmentAccordion
+            title="악세, 특장 융합석"
+            headerColor="var(--secondary-purple)"
+            accentColor="#2563eb"
+            sections={[
+              {
+                ...accessoryEquipmentSections[0],
+                items: accessoryEquipmentSections[0].items
+              },
+              {
+                ...accessoryEquipmentSections[1],
+                items: accessoryEquipmentSections[1].items
+              },
+              {
+                ...accessoryEquipmentSections[2],
+                items: accessoryEquipmentSections[2].items
+              }
+            ]}
+            additionalContent={
+              <>
+                {/* 각 섹션에 특수/악세 융합석을 추가 */}
+                <style jsx>{`
+                  :global(.equipment-section-0) { }
+                `}</style>
+              </>
+            }
+          />
         </div>
       </div>
 
-      {/* 푸터 */}
       <Footer />
     </div>
   );

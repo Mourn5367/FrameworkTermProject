@@ -1,0 +1,20 @@
+fastapi==0.115.13
+uvicorn[standard]==0.27.0
+beautifulsoup4==4.12.3
+requests==2.31.0
+pymongo==4.6.0  # MongoDB driver (motor 호환 버전)
+motor==3.3.2  # Async MongoDB driver
+apscheduler==3.10.4
+python-dotenv==1.0.0
+lxml==5.1.0
+httpx==0.26.0  # Async HTTP client
+pydantic-settings==2.1.0  # Pydantic settings management
+selenium==4.16.0  # 디시인사이드 크롤링 (폴백용)
+webdriver-manager==4.0.1  # ChromeDriver 자동 관리 (폴백용)
+nodriver==0.37  # 2025년 최신 Cloudflare 우회 (아카라이브용)
+opencv-python==4.10.0.84  # Cloudflare CAPTCHA 자동 해결용
+playwright==1.41.0  # Playwright 아카라이브 크롤러용 (Windows 안정)
+konlpy==0.6.0  # 한글 형태소 분석
+wordcloud==1.9.3  # 워드클라우드 생성
+matplotlib==3.8.2  # 시각화
+pandas==2.1.4  # 데이터 분석 (선택)

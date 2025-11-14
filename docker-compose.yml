@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:7.0
@@ -13,7 +11,7 @@ services:
       MONGO_INITDB_DATABASE: dnf_insight
     volumes:
       - mongodb_data:/data/db
-      - d:/03_Spring/Next_Spring/mongo-init:/docker-entrypoint-initdb.d:ro
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
     networks:
       - dnf-network
     healthcheck:
@@ -67,7 +65,7 @@ services:
     networks:
       - dnf-network
     volumes:
-      - d:/03_Spring/Next_Spring/backend/logs:/app/logs
+      - ./backend/logs:/app/logs
 
   frontend:
     build:
@@ -90,6 +88,28 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+
+  crawler:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    container_name: dnf-crawler
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/dnf_insight?authSource=admin
+      MONGODB_DB_NAME: dnf_insight
+      CRAWL_INTERVAL_MINUTES: 60
+      TARGET_SITE_URL: https://example-community.com
+      ENVIRONMENT: development
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - dnf-network
+    volumes:
+      - ./crawler:/app
 
 networks:
   dnf-network:
