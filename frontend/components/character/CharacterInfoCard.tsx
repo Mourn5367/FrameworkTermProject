@@ -3,6 +3,12 @@
 import Image from 'next/image';
 
 export interface CharacterInfo {
+  characterId: string;
+  serverId: string;
+  characterName: string;
+  jobName: string;
+  jobGrowName: string;
+  level: number;
   fame: number;
   nickname: string;
   server: string;
@@ -10,12 +16,13 @@ export interface CharacterInfo {
   guildName: string;
   connectionTime: {
     hours: number;
-    period: string;
+    weekdayRange: string;
+    weekendRange: string;
   };
   weeklyDungeons: {
     name: string;
-    current: number;
-    max: number;
+    cleared: boolean;
+    count: number;
   }[];
   currentWeekGrade: {
     legendary: number;
@@ -49,33 +56,46 @@ export default function CharacterInfoCard({
         <h2 className="text-lg font-bold text-white">{title}</h2>
       </div>
       <div className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 1열: 캐릭터 사진 + 직업 일러스트 (7:3) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* 1열: 캐릭터 사진 + 직업 정보 (7:3) */}
           <div className="flex flex-col gap-3">
             {/* 캐릭터 사진 (7) */}
             <div
-              className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center overflow-hidden"
-              style={{ flex: 'var(--character-photo-ratio)' }}
+              className="rounded-xl flex items-center justify-center overflow-hidden relative"
+              style={{
+                flex: 'var(--character-photo-ratio)',
+                backgroundImage: 'url(https://bbscdn.df.nexon.com/data7/showroom/static/img/bg3.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
             >
-              <p className="text-sm text-gray-600 font-medium">캐릭터 사진</p>
+              <img
+                src={`https://img-api.neople.co.kr/df/servers/${character.serverId}/characters/${character.characterId}?zoom=1`}
+                alt={character.characterName}
+                className="w-full h-full object-contain relative z-10"
+              />
             </div>
 
-            {/* 직업 일러스트 (3) */}
+            {/* 직업 정보 (3) */}
             <div
-              className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center overflow-hidden"
+              className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center overflow-hidden p-4"
               style={{ flex: 'var(--job-illustration-ratio)' }}
             >
-              <p className="text-xs text-gray-600 font-medium">직업 일러스트</p>
+              <div className="text-center w-full">
+                <p className="text-xs text-white opacity-90 mb-1">{character.jobName}</p>
+                <p className="text-sm font-bold text-white">{character.jobGrowName}</p>
+                <p className="text-xs text-white opacity-90 mt-1">Lv. {character.level}</p>
+              </div>
             </div>
           </div>
 
           {/* 2열: 명성 + 닉네임/서버/모험단/길드 + 접속시간대 */}
           <div className="flex flex-col">
             {/* 상단 영역: 명성 + 기본 정보 */}
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-3">
               {/* 명성 */}
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-4">
+                <div className="flex items-center justify-center gap-1 mb-2">
                   <Image src="/images/fame-icon.png" alt="명성" width={24} height={24} />
                   <h3 className="text-3xl font-black" style={{ color: accentColor }}>
                     {character.fame.toLocaleString()}
@@ -84,10 +104,10 @@ export default function CharacterInfoCard({
               </div>
 
               {/* 기본 정보 */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">EADG</p>
-                  <p className="text-base font-bold text-gray-800">{character.nickname}</p>
+                  <p className="text-xs text-gray-500 mb-1">캐릭터명</p>
+                  <p className="text-base font-bold text-gray-800">{character.characterName}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">서버명</p>
@@ -109,7 +129,7 @@ export default function CharacterInfoCard({
               className="flex flex-col justify-end"
               style={{ flex: 'var(--job-illustration-ratio)' }}
             >
-              <h4 className="text-sm font-bold text-gray-700 mb-3">접속 시간대</h4>
+              <h4 className="text-sm font-bold text-gray-700 mb-3 mt-3">접속 시간대</h4>
               <div className="flex items-center gap-4">
                 <div className="relative w-24 h-24 flex-shrink-0">
                   <svg viewBox="0 0 100 100" className="transform -rotate-90">
@@ -126,15 +146,33 @@ export default function CharacterInfoCard({
                       strokeLinecap="round"
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="text-base font-bold" style={{ color: accentColor }}>
-                      {character.connectionTime.hours}시간
-                    </p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    {character.connectionTime.weekdayRange && (
+                      <p className="text-xs font-bold text-green-600">
+                        {character.connectionTime.weekdayRange}시
+                      </p>
+                    )}
+                    {character.connectionTime.weekendRange && (
+                      <p className="text-xs font-bold text-red-600">
+                        {character.connectionTime.weekendRange}시
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1 font-medium">주요 활동 시간</p>
-                  <p className="text-sm text-gray-500">{character.connectionTime.period}</p>
+                  <div className="space-y-1">
+                    {character.connectionTime.weekdayRange && (
+                      <p className="text-sm text-gray-700">
+                        평일: {character.connectionTime.weekdayRange.replace('-', '시 ~ ')}시
+                      </p>
+                    )}
+                    {character.connectionTime.weekendRange && (
+                      <p className="text-sm text-red-600">
+                        주말: {character.connectionTime.weekendRange.replace('-', '시 ~ ')}시
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -149,8 +187,12 @@ export default function CharacterInfoCard({
                 {character.weeklyDungeons.map((dungeon, idx) => (
                   <div key={idx} className="flex justify-between items-center">
                     <span className="text-base text-gray-700">{dungeon.name}</span>
-                    <span className="text-base font-bold" style={{ color: accentColor }}>
-                      {dungeon.current} / {dungeon.max}
+                    <span
+                      className={`text-base font-bold ${
+                        dungeon.cleared ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
+                      {dungeon.cleared ? '클리어' : '미클리어'}
                     </span>
                   </div>
                 ))}

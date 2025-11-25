@@ -36,6 +36,8 @@ public class EquipmentResponse {
         private String itemId;
         private String itemName;
         private String itemTypeDetail;
+        private String setItemId;
+        private String setItemName;
 
         /**
          * 무기 융합석 정보 (배열)

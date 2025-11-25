@@ -1,9 +1,11 @@
 package com.dnf.insight.service;
 
 import com.dnf.insight.config.DnfApiConfig;
+import com.dnf.insight.dto.CharacterBasicResponse;
 import com.dnf.insight.dto.CharacterFameResponse;
 import com.dnf.insight.dto.CharacterSearchResponse;
 import com.dnf.insight.dto.EquipmentResponse;
+import com.dnf.insight.dto.SkillInfo;
 import com.dnf.insight.dto.SkillStyleResponse;
 import com.dnf.insight.dto.TimelineResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,16 +32,53 @@ public class DnfApiClient {
     private final ApiKeyManager apiKeyManager;
     private final DnfApiConfig dnfApiConfig;
 
-    private static final DateTimeFormatter API_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmm");
+    private static final DateTimeFormatter API_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    /**
+     * 캐릭터 기본 정보 조회
+     *
+     * @param serverId 서버 ID
+     * @param characterId 캐릭터 ID
+     * @return 캐릭터 기본 정보 (모험단명, 길드명 포함)
+     */
+    public CharacterBasicResponse getCharacterBasicInfo(String serverId, String characterId) {
+        String apiKey = apiKeyManager.getAvailableApiKey();
+        if (apiKey == null) {
+            log.error("❌ No available API key for character basic info");
+            throw new RuntimeException("All API keys exceeded rate limit");
+        }
+
+        String url = String.format("/df/servers/%s/characters/%s", serverId, characterId);
+
+        try {
+            CharacterBasicResponse response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(url)
+                            .queryParam("apikey", apiKey)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(CharacterBasicResponse.class)
+                    .block();
+
+            log.info("✅ Character basic info retrieved: characterId={}, adventureName={}, guildName={}, fame={}",
+                    characterId, response.getAdventureName(), response.getGuildName(), response.getFame());
+            return response;
+
+        } catch (WebClientResponseException e) {
+            log.error("❌ Character basic info retrieval failed: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Character basic info retrieval failed: " + e.getMessage(), e);
+        }
+    }
 
     /**
      * 캐릭터 검색
      *
      * @param serverId 서버 ID (cain, diregie, siroco, prey, casillas, hilder, anton, bakal)
      * @param characterName 캐릭터 닉네임
+     * @param wordType 검색 타입 ("match" 정확히 일치, "full" 포함)
      * @return 캐릭터 검색 결과
      */
-    public CharacterSearchResponse searchCharacter(String serverId, String characterName) {
+    public CharacterSearchResponse searchCharacter(String serverId, String characterName, String wordType) {
         String apiKey = apiKeyManager.getAvailableApiKey();
         if (apiKey == null) {
             log.error("❌ No available API key for character search");
@@ -53,14 +92,14 @@ public class DnfApiClient {
                     .uri(uriBuilder -> uriBuilder
                             .path(url)
                             .queryParam("characterName", characterName)
-                            .queryParam("wordType", "match") // 정확히 일치
+                            .queryParam("wordType", wordType != null ? wordType : "match")
                             .queryParam("apikey", apiKey)
                             .build())
                     .retrieve()
                     .bodyToMono(CharacterSearchResponse.class)
                     .block();
 
-            log.info("✅ Character search success: {} (server: {})", characterName, serverId);
+            log.info("✅ Character search success: {} (server: {}, wordType: {})", characterName, serverId, wordType);
             return response;
 
         } catch (WebClientResponseException e) {
@@ -200,13 +239,22 @@ public class DnfApiClient {
         try {
             CharacterFameResponse response = webClient.get()
                     .uri(uriBuilder -> {
+                        // 필수 파라미터 추가 (항상 값이 존재)
                         var builder = uriBuilder
                                 .path(url)
-                                .queryParam("jobId", jobId)
-                                .queryParam("jobGrowId", jobGrowId)
-                                .queryParam("limit", limit != null ? limit : 100)
-                                .queryParam("apikey", apiKey);
+                                .queryParam("jobId", jobId)           // 필수: 직업 ID
+                                .queryParam("jobGrowId", jobGrowId)   // 필수: 각성 직업 ID
+                                .queryParam("limit", limit != null ? limit : 100)  // 기본값 100
+                                .queryParam("apikey", apiKey);        // 필수: API 키
 
+                        // 선택적 파라미터 처리 (null 체크 필수)
+                        // ⚠️ 중요: null인 경우 파라미터를 아예 추가하지 않아야 함
+                        // - queryParam("minFame", null) → URL에 "?minFame=null" 문자열로 전송되어 API 오류 발생
+                        // - null 체크 후 조건부 추가 → null이면 파라미터 자체가 URL에 포함되지 않음 (정상)
+                        //
+                        // 예시:
+                        // - null 체크 없이: /characters-fame?jobId=xxx&minFame=null&maxFame=null (❌ 오류)
+                        // - null 체크 있음: /characters-fame?jobId=xxx (✅ 정상)
                         if (minFame != null) {
                             builder.queryParam("minFame", minFame);
                         }
@@ -297,6 +345,48 @@ public class DnfApiClient {
         } catch (WebClientResponseException e) {
             log.error("❌ Skill style retrieval failed: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Skill style retrieval failed: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 스킬 상세 정보 조회
+     *
+     * @param jobId 직업 ID
+     * @param skillId 스킬 ID
+     * @return 스킬 정보 (진화/강화 정보 포함)
+     */
+    public SkillInfo getSkillInfo(String jobId, String skillId) {
+        String apiKey = apiKeyManager.getAvailableApiKey();
+        if (apiKey == null) {
+            log.error("❌ No available API key for skill info");
+            return null; // Rate limit 초과 시 null 반환
+        }
+
+        String url = String.format("/df/skills/%s/%s", jobId, skillId);
+
+        try {
+            SkillInfo response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(url)
+                            .queryParam("apikey", apiKey)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(SkillInfo.class)
+                    .block();
+
+            log.debug("✅ Skill info retrieved: skillId={}", skillId);
+            return response;
+
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode().value() == 404) {
+                log.warn("⚠️ Skill not found: jobId={}, skillId={}", jobId, skillId);
+                return null;
+            }
+            log.error("❌ Skill info retrieval failed: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return null; // 오류 시 null 반환
+        } catch (Exception e) {
+            log.error("❌ Unexpected error retrieving skill info: {}", e.getMessage());
+            return null;
         }
     }
 }

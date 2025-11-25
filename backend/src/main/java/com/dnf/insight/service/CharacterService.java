@@ -58,10 +58,12 @@ public class CharacterService {
 
     /**
      * 캐릭터 검색 (캐싱 지원)
+     * wordType을 full과 match 두 번 검색하여 중복 제거 후 합침
+     * 모험단명과 길드명을 추가로 조회하여 포함
      *
      * @param serverId 서버 ID
      * @param characterName 캐릭터 닉네임
-     * @return 캐릭터 검색 결과
+     * @return 캐릭터 검색 결과 (모험단명, 길드명 포함)
      */
     public CharacterSearchResponse searchCharacter(String serverId, String characterName) {
         String cacheKey = CHARACTER_CACHE_PREFIX + serverId + ":" + characterName;
@@ -73,8 +75,49 @@ public class CharacterService {
             return (CharacterSearchResponse) cached;
         }
 
-        // API 호출
-        CharacterSearchResponse response = dnfApiClient.searchCharacter(serverId, characterName);
+        // API 호출 (match + full 검색)
+        CharacterSearchResponse matchResponse = dnfApiClient.searchCharacter(serverId, characterName, "match");
+        CharacterSearchResponse fullResponse = dnfApiClient.searchCharacter(serverId, characterName, "full");
+
+        // 중복 제거를 위한 Map (characterId 기준)
+        java.util.Map<String, CharacterSearchResponse.CharacterInfo> uniqueCharacters = new java.util.LinkedHashMap<>();
+
+        // match 결과 추가
+        if (matchResponse.getRows() != null) {
+            for (CharacterSearchResponse.CharacterInfo character : matchResponse.getRows()) {
+                uniqueCharacters.put(character.getCharacterId(), character);
+            }
+        }
+
+        // full 결과 추가 (중복 제거)
+        if (fullResponse.getRows() != null) {
+            for (CharacterSearchResponse.CharacterInfo character : fullResponse.getRows()) {
+                uniqueCharacters.putIfAbsent(character.getCharacterId(), character);
+            }
+        }
+
+        // 합쳐진 결과 생성
+        CharacterSearchResponse response = new CharacterSearchResponse();
+        response.setRows(new java.util.ArrayList<>(uniqueCharacters.values()));
+
+        log.info("🔍 Search results: match={}, full={}, unique={}",
+                matchResponse.getRows() != null ? matchResponse.getRows().size() : 0,
+                fullResponse.getRows() != null ? fullResponse.getRows().size() : 0,
+                response.getRows().size());
+
+        // 각 캐릭터의 상세 정보 조회 (모험단명, 길드명)
+        if (response.getRows() != null && !response.getRows().isEmpty()) {
+            for (CharacterSearchResponse.CharacterInfo character : response.getRows()) {
+                try {
+                    var basicInfo = dnfApiClient.getCharacterBasicInfo(character.getServerId(), character.getCharacterId());
+                    character.setAdventureName(basicInfo.getAdventureName());
+                    character.setGuildName(basicInfo.getGuildName());
+                } catch (Exception e) {
+                    log.warn("⚠️ Failed to get basic info for character: {}", character.getCharacterId());
+                    // 실패해도 계속 진행 (모험단명/길드명 없이)
+                }
+            }
+        }
 
         // 캐시 저장 (5분)
         redisTemplate.opsForValue().set(

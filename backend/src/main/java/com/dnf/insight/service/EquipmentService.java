@@ -194,8 +194,14 @@ public class EquipmentService {
             switch (slotName) {
                 case "무기":
                     String tuneName = null;
+                    // 튠 배열에서 name이 null이 아닌 것 찾기 (보통 두 번째 튠)
                     if (item.getTune() != null && !item.getTune().isEmpty()) {
-                        tuneName = item.getTune().get(0).getName();
+                        for (EquipmentResponse.TuneInfo tune : item.getTune()) {
+                            if (tune.getName() != null && !tune.getName().isEmpty()) {
+                                tuneName = tune.getName();
+                                break;
+                            }
+                        }
                     }
                     equipment.setWeapon(CharacterEquipment.WeaponSlot.builder()
                             .itemId(item.getItemId())
@@ -277,6 +283,8 @@ public class EquipmentService {
         return CharacterEquipment.EquipmentSlot.builder()
                 .itemId(item.getItemId())
                 .itemName(item.getItemName())
+                .setItemId(item.getSetItemId())
+                .setItemName(item.getSetItemName())
                 .upgradeItemId(item.getUpgradeInfo() != null ? item.getUpgradeInfo().getItemId() : null)
                 .upgradeItemName(item.getUpgradeInfo() != null ? item.getUpgradeInfo().getItemName() : null)
                 .build();

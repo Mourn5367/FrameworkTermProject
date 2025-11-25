@@ -113,24 +113,35 @@ backend/src/main/java/com/dnf/insight/
 │   ├── MongoConfig.java            # MongoDB 설정
 │   ├── RedisConfig.java            # Redis 설정 (API 키 관리 + 캐싱)
 │   ├── DnfApiConfig.java           # 던파 API 설정 (다중 키, Rate Limiting)
-│   └── WebClientConfig.java        # WebClient 설정 (API 호출용)
+│   ├── WebClientConfig.java        # WebClient 설정 (API 호출용)
+│   └── OpenApiConfig.java          # Swagger/OpenAPI 설정 ✅
 ├── controller/
 │   ├── HealthController.java       # /api/health 엔드포인트
-│   └── CharacterController.java    # /api/characters 엔드포인트 ✅
+│   ├── CharacterController.java    # /api/characters 엔드포인트 ✅
+│   ├── RankingController.java      # /api/ranking 장비 수집 ✅
+│   └── EquipmentStatsController.java # /api/stats 장비 통계 ✅
 ├── service/
 │   ├── ApiKeyManager.java          # Redis 기반 API 키 관리 + Rate Limiting ✅
 │   ├── DnfApiClient.java           # WebClient 기반 던파 API 호출 ✅
 │   ├── CharacterService.java       # 캐릭터 검색/조회 (5분 캐싱) ✅
-│   └── TimelineAnalysisService.java # 타임라인 분석 (던전/시간대) ✅
+│   ├── TimelineAnalysisService.java # 타임라인 분석 (던전/시간대) ✅
+│   ├── RankingService.java         # 명성 기반 Top 100 수집 ✅
+│   ├── EquipmentService.java       # 장비+스킬 수집 및 저장 ✅
+│   └── EquipmentStatsService.java  # 장비 통계 생성 ✅
 ├── dto/
 │   ├── CharacterSearchResponse.java # 캐릭터 검색 응답 ✅
 │   ├── TimelineResponse.java        # 타임라인 응답 ✅
 │   ├── WeeklyDungeonStatus.java     # 주간 던전 현황 ✅
-│   └── PlayTimeAnalysis.java        # 접속 시간대 분석 ✅
+│   ├── PlayTimeAnalysis.java        # 접속 시간대 분석 ✅
+│   ├── EquipmentResponse.java       # 장비 API 응답 ✅
+│   ├── SkillStyleResponse.java      # 스킬 특성 응답 ✅
+│   └── JobEquipmentStats.java       # 장비 통계 응답 ✅
+├── domain/
+│   └── CharacterEquipment.java      # 캐릭터 장비 엔티티 ✅
+├── repository/
+│   └── CharacterEquipmentRepository.java # MongoDB Repository ✅
 ├── util/
 │   └── DungeonResetUtil.java        # 던전 리셋 시간 계산 (목요일 06시) ✅
-├── repository/                      # MongoDB Repository (미구현)
-├── domain/                          # 엔티티 (미구현)
 └── exception/                       # 예외 처리 (미구현)
 ```
 
@@ -640,12 +651,462 @@ dataset.push_to_hub("your-username/arca-dunfa")
    - Redis 기반 5분 캐싱 (동일 캐릭터)
    - 중복 API 호출 방지
 
+## 최근 구현 내역 (계속)
+
+### 2025.01.17 - 일괄 수집 시스템 및 통계 UI 구현 ✅
+
+1. **일괄 수집 API 및 MVC 리팩토링**
+   - `BulkCollectionController`: 전체 69개 眞 직업 일괄 수집 API
+   - `/api/bulk/collect-all`: POST 엔드포인트로 전체 수집 트리거
+   - `/api/bulk/jobs`: GET 엔드포인트로 jobs.json 목록 조회
+   - MVC 패턴 준수: Controller는 HTTP 처리만, 비즈니스 로직은 Service로 이동
+   - `RankingService.loadAllJobs()`: jobs.json 파싱 로직
+   - jobId 그룹별 병렬 처리 유지 (기존 `collectEquipmentsByJobId()` 활용)
+
+2. **방어구 융합석 조합 통계**
+   - `JobEquipmentStats.armorSetCombinations`: 5부위 기품/욕망/배신 조합 통계
+   - "기품 * 5, 욕망 * 0, 배신 * 0" 형태로 조합 표시
+   - `ArmorSetStats` 제거 (단순 세트 분류는 불필요)
+   - 각 캐릭터의 5부위(상의/하의/머리어깨/신발/벨트) 융합석 분석
+   - 융합석 이름에서 "기품", "욕망", "배신" 키워드 감지
+
+3. **프론트엔드 통계 UI 구현**
+   - `EquipmentStatsSection.tsx`: 실제 API 데이터 기반 통계 표시
+   - 더미 데이터 완전 제거 (page.tsx에서 아코디언 2개 삭제)
+   - **세트, 방어구, 무기 융합석 아코디언:**
+     - 선호 세트 (상위 10개)
+     - 방어구 융합석 조합 (기품/욕망/배신 개수 조합)
+     - 방어구 융합석 (5부위 합산 상위 10개)
+     - 무기 해방 (weaponTunes, "무기 튠" → "무기 해방"으로 변경)
+     - 칭호 레벨 (칭호 이름에서 숫자 추출 후 레벨별 합산)
+   - **악세, 특장 융합석 아코디언:**
+     - 목걸이/팔찌/반지 융합석
+     - 보조장비/마법석/귀걸이 융합석
+     - 악세서리 조합 (목걸이-팔찌-반지)
+     - 특수장비 조합 (보조-마석-귀걸이)
+
+4. **칭호 레벨 통계 처리**
+   - 칭호 이름에서 정규식으로 숫자 추출
+   - 같은 레벨의 칭호 퍼센테이지 합산
+   - 예: "30주년 칭호" + "레벨 30 달성" → "30 레벨" 통계
+   - 숫자 없는 칭호는 통계에서 제외
+
+5. **수집 결과**
+   - 총 69개 眞 직업, 6,900명 캐릭터 수집
+   - 성공률: 99.97% (2명 실패 - StackOverflowError)
+   - 실패 원인: 네오플 API 응답의 순환 참조 또는 깊은 중첩 구조
+   - 소요 시간: 약 2-3분 (jobId 그룹 간 0.5초 대기)
+
+**API 엔드포인트:**
+```bash
+# 전체 직업 일괄 수집 (69개 × 100명)
+POST /api/bulk/collect-all
+→ {"totalJobs":69,"totalSuccess":6898,"totalFail":2,"successRate":"99.97%"}
+
+# jobs.json 목록 조회
+GET /api/bulk/jobs
+→ {"totalCount":69,"jobs":[{jobId, jobGrowId, jobName, jobGrowName}, ...]}
+```
+
+**데이터 구조 변경:**
+```java
+// 제거됨
+public static class ArmorSetStats {
+  private ItemStat dignity, desire, betrayal, others;
+}
+
+// 추가됨
+private List<CombinationStat> armorSetCombinations;
+// 예: "기품 * 5, 욕망 * 0, 배신 * 0" → 49명 (49%)
+```
+
+**프론트엔드 개선:**
+- API 타입: `armorSets` 제거, `armorSetCombinations` 추가
+- 방어구 융합석 5부위 데이터 합산 표시
+- 칭호 레벨 자동 그룹핑 로직
+- 모든 더미 데이터 제거 (100% 실제 API 데이터 사용)
+
+### 2025.01.16 - 장비 통계 시스템 및 Swagger API 문서 ✅
+
+1. **직업별 장비 통계 API**
+   - `EquipmentStatsService`: 100명 데이터 기반 통계 생성
+   - `JobEquipmentStats` DTO: 모든 통계 항목 포함
+   - MongoDB 집계 후 사용 비율(%) 계산
+   - 무기 튠 정보 추가 수집 (새겨진 해일의 기억 등)
+
+2. **통계 항목 (11개 카테고리)**
+   - 무기: 타입(itemTypeDetail), 튠 이름
+   - 칭호: itemId, itemName
+   - 방어구 융합석: 5부위 각각 (상의/하의/머리어깨/신발/벨트)
+   - 방어구 세트: 기품/욕망/배신 비율 (아이템명 키워드 감지)
+   - 악세서리 융합석: 3부위 각각 (목걸이/팔찌/반지)
+   - 악세서리 조합: "테아나, 축복, 무지" 등 3개 조합 통계
+   - 특수장비 융합석: 3부위 각각 (보조장비/마법석/귀걸이)
+   - 특수장비 조합: 보조-마법석-귀걸이 조합 통계
+   - 세트 아이템: setItemId, setItemName
+   - 스킬: 진화/강화 skillId별
+
+3. **Swagger/OpenAPI 통합**
+   - SpringDoc OpenAPI 3.0 (build.gradle)
+   - `OpenApiConfig`: API 문서 메타데이터 설정
+   - Controller 어노테이션: `@Operation`, `@ApiResponse`, `@Parameter`
+   - Swagger UI: `http://localhost:8080/swagger-ui.html`
+   - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+4. **데이터 구조 개선**
+   - `CharacterEquipment.WeaponSlot`: tuneName 필드 추가
+   - `EquipmentService`: tune 배열에서 name이 null이 아닌 값 추출
+   - `CharacterEquipmentRepository`: `findByJobIdAndJobGrowId()` 메서드 추가
+
+**API 엔드포인트:**
+```
+GET /api/stats/equipment?jobId={jobId}&jobGrowId={jobGrowId}
+- 직업별 장비/스킬 사용 통계
+- 응답: percentage 포함한 모든 통계 데이터
+```
+
+**실사용 예시 (眞 뮤즈 100명):**
+- 무기 타입: 선현궁 100%
+- 튠: 새겨진 해일의 기억 51%, 새겨진 돌풍의 기억 37%
+- 칭호: 프로스트의 전설 73%
+- 악세 조합: 테아나 3셋 79%
+- 특수장비 조합: 설계 모듈 3종 다양
+
+### 2025.01.14 - 장비 수집 시스템 및 3단계 병렬 처리 최적화 ✅
+
+1. **명성 기반 랭킹 시스템**
+   - 직업별(jobId) + 각성별(jobGrowId) Top 100 캐릭터 수집
+   - 명성 범위 자동 조절 (2000씩 감소하며 재시도)
+   - HashSet 기반 중복 제거 (serverId + characterId 조합)
+   - MongoDB에 캐릭터 장비 데이터 저장
+
+2. **3단계 병렬 처리 아키텍처**
+   - **1단계**: 장비 API + 스킬 API 동시 호출 (CompletableFuture)
+   - **2단계**: 100명 캐릭터 병렬 수집 (Stream API + CompletableFuture)
+   - **3단계**: 같은 jobId의 여러 jobGrowId 병렬 처리
+   - **성능**: 6,900명 수집 시간 9분 → 2분 13초 (4배 개선)
+
+3. **데이터 무결성 보장**
+   - jobId + jobGrowId 복합 키 기반 삭제/조회
+   - 재수집 전 기존 데이터 자동 삭제
+   - jobName, jobGrowName 추가 저장 (가독성)
+   - 네오플 API에서 직접 가져온 69개 眞 직업 리스트
+
+4. **수집 스크립트**
+   - `collect_by_jobid.sh`: jobId별 그룹화 후 순차 처리
+   - Python 내장: JSON 파싱 및 API 호출
+   - 실시간 진행률 표시 (성공/실패 카운트)
+
+5. **Repository 패턴**
+   - `CharacterEquipmentRepository`: MongoDB 접근
+   - `countByJobIdAndJobGrowId()`: 기존 데이터 확인
+   - `deleteByJobIdAndJobGrowId()`: 재수집 전 정리
+   - Spring Data MongoDB 자동 쿼리 생성
+
+**상세 문서**: `/home/aisw/Next_Spring/PERFORMANCE_OPTIMIZATION.md` 참고
+
+## 핵심 아키텍처 설명
+
+### 1. API 키 관리 시스템 (Redis 기반)
+
+**구성 요소:**
+- `ApiKeyManager`: 다중 API 키 관리 + Rate Limiting
+- `DnfApiConfig`: application.yml에서 API 키 배열 로드
+- `RedisTemplate`: Sliding Window 방식으로 1초/1분/1시간 단위 카운팅
+
+**흐름:**
+```
+application.yml
+  → keys: ${DNF_API_KEYS:기본값1,기본값2}
+  → DnfApiConfig.keys (List<String>)
+  → ApiKeyManager 생성자 주입
+  → Redis 초기화 (api_key_0, api_key_1, ...)
+  → getAvailableApiKey() 호출 시 Rate Limit 체크
+  → 한도 초과 시 자동으로 다음 키로 전환
+```
+
+**Rate Limiting 알고리즘:**
+- Redis Sorted Set에 타임스탬프 저장
+- 1초 이전 데이터 자동 삭제 (removeRangeByScore)
+- O(log N) 시간복잡도로 카운팅
+
+### 2. 병렬 처리 아키텍처
+
+**CompletableFuture 사용 이유:**
+- Java 표준 라이브러리 (별도 의존성 불필요)
+- ForkJoinPool 자동 제공 (CPU 코어 수 - 1)
+- 네트워크 I/O 대기 시간 활용
+
+**3단계 계층 구조:**
+```
+collect_by_jobid.sh
+  └─ collectEquipmentsByJobId() [3단계: jobId 그룹 병렬]
+      └─ collectEquipmentsForJob() [2단계: 100명 병렬]
+          └─ saveEquipment() [1단계: 장비+스킬 API 병렬]
+```
+
+**핵심 코드 패턴:**
+```java
+// Stream API로 CompletableFuture 리스트 생성
+List<CompletableFuture<Result>> futures = items.stream()
+    .map(item -> CompletableFuture.supplyAsync(() -> process(item)))
+    .collect(Collectors.toList());
+
+// 모든 작업 완료 대기
+CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+// 결과 수집
+List<Result> results = futures.stream()
+    .map(CompletableFuture::join)
+    .collect(Collectors.toList());
+```
+
+### 3. 중복 제거 로직
+
+**문제**: 명성 범위가 겹치면 같은 캐릭터가 여러 API 응답에 포함됨
+
+**해결**: HashSet 기반 O(1) 중복 체크
+```java
+Set<String> collectedIds = new HashSet<>();
+String uniqueKey = serverId + ":" + characterId;
+
+if (!collectedIds.contains(uniqueKey)) {  // O(1)
+    allCharacters.add(character);
+    collectedIds.add(uniqueKey);
+}
+```
+
+**시간복잡도:**
+- HashSet: O(1) × 100 = 100회
+- ArrayList: O(n) × 100 = 5,050회 (50배 느림)
+
+### 4. WebClient 기반 API 호출
+
+**메서드 체이닝 (Fluent API):**
+```java
+webClient.get()                        // GET 요청 시작
+    .uri(uriBuilder -> {...})          // URI 설정
+    .retrieve()                        // 요청 전송
+    .bodyToMono(ResponseClass.class)   // 응답 변환
+    .block();                          // 동기 대기
+```
+
+**선택적 파라미터 처리:**
+```java
+// 필수 파라미터: 항상 추가
+.queryParam("jobId", jobId)
+
+// 선택적 파라미터: null 체크 후 조건부 추가
+if (minFame != null) {
+    builder.queryParam("minFame", minFame);
+}
+// ⚠️ null을 직접 전달하면 "?minFame=null" 문자열로 전송되어 API 오류!
+```
+
+### 5. MongoDB + Redis 캐싱 전략
+
+**캐싱 계층:**
+- Redis: 5분 TTL (API 응답 캐싱)
+- MongoDB: 영구 저장 (CharacterEquipment 컬렉션)
+
+**데이터 재수집 전략:**
+```java
+// 1. 기존 데이터 개수 확인
+long count = repository.countByJobIdAndJobGrowId(jobId, jobGrowId);
+
+// 2. 100개 이상이면 삭제 후 재수집
+if (count > 0) {
+    repository.deleteByJobIdAndJobGrowId(jobId, jobGrowId);
+}
+
+// 3. 새로운 데이터 수집
+List<CharacterEquipment> newData = collectTop100(...);
+repository.saveAll(newData);
+```
+
+## 주요 명령어
+
+### 개발 환경 실행
+
+```bash
+# WSL 경로로 이동
+cd /home/aisw/Next_Spring
+
+# Docker 전체 스택 실행
+docker-compose up -d
+
+# 백엔드만 재시작
+docker-compose restart backend
+
+# 로그 실시간 확인
+docker-compose logs -f backend
+
+# 컨테이너 접속
+docker exec -it dnf-backend bash
+```
+
+### 백엔드 빌드 및 실행
+
+```bash
+# Gradle 빌드 (테스트 제외)
+cd /home/aisw/Next_Spring/backend
+./gradlew clean build -x test
+
+# 로컬 실행 (Docker 없이)
+./gradlew bootRun
+
+# 특정 테스트만 실행
+./gradlew test --tests RankingServiceTest
+
+# 의존성 확인
+./gradlew dependencies
+```
+
+### 데이터 수집 스크립트
+
+```bash
+# 전체 69개 직업 × 100명 수집 (권장)
+bash /home/aisw/Next_Spring/scripts/collect_by_jobid.sh
+
+# 단일 직업 수집 (API 테스트용)
+curl -X POST "http://localhost:8080/api/ranking/collect" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "jobId=41f1cdc2ff58bb5fdc287be0db2a8df3" \
+  -d "jobGrowId=37495b941da3b1661bc900e68ef3b2c6" \
+  -d "jobName=귀검사(남)" \
+  -d "jobGrowName=眞 웨폰마스터"
+
+# jobId 그룹 수집 (같은 직업군의 여러 각성 동시 수집)
+curl -X POST "http://localhost:8080/api/ranking/collect-by-jobid" \
+  -H "Content-Type: application/json" \
+  -d @scripts/all_jobs.json
+```
+
+### MongoDB 데이터 확인
+
+```bash
+# MongoDB 접속
+docker exec -it dnf-mongodb mongosh -u admin -p password123
+
+# 데이터베이스 선택
+use dnf_insight
+
+# 캐릭터 장비 데이터 확인
+db.character_equipments.countDocuments()
+db.character_equipments.find().limit(5).pretty()
+
+# 특정 직업 데이터 확인
+db.character_equipments.find({
+  "jobName": "귀검사(남)",
+  "jobGrowName": "眞 웨폰마스터"
+}).count()
+
+# 인덱스 확인
+db.character_equipments.getIndexes()
+```
+
+### Redis 데이터 확인
+
+```bash
+# Redis 접속
+docker exec -it dnf-redis redis-cli
+
+# API 키 확인
+KEYS api_key_*
+
+# Rate Limit 카운터 확인
+KEYS rate_limit:*
+ZCARD rate_limit:api_key_0
+
+# 캐시된 데이터 확인
+KEYS *
+TTL some_cache_key
+```
+
+## API 엔드포인트
+
+**API 문서:** `http://localhost:8080/swagger-ui.html` (Swagger UI)
+
+### 장비 수집 API
+
+```
+POST /api/ranking/collect
+- 단일 직업의 Top 100 수집
+- 파라미터: jobId, jobGrowId, jobName, jobGrowName
+
+POST /api/ranking/collect-by-jobid
+- 같은 jobId의 여러 jobGrowId 병렬 수집
+- Body: JSON 배열 [{jobId, jobGrowId, jobName, jobGrowName}, ...]
+- 예: 귀검사(남) 5개 각성을 동시에 수집
+```
+
+### 장비 통계 API ✅
+
+```
+GET /api/stats/equipment?jobId={jobId}&jobGrowId={jobGrowId}
+- 직업별 장비/스킬 사용 통계
+- 응답: 무기, 칭호, 융합석, 조합, 세트, 스킬 통계
+- 사용 비율(percentage) 포함
+```
+
+### 캐릭터 API
+
+```
+GET /api/characters/search?serverId={id}&characterName={name}
+- 캐릭터 검색
+
+GET /api/characters/{serverId}/{characterId}/weekly-dungeons
+- 주간 던전 현황
+
+GET /api/characters/{serverId}/{characterId}/playtime
+- 접속 시간대 분석
+
+GET /api/characters/{serverId}/{characterId}/image?zoom={1-3}
+- 캐릭터 이미지 URL
+
+DELETE /api/characters/{serverId}/{characterId}/cache
+- 캐시 무효화
+```
+
+## 코드 작성 시 주의사항
+
+### 1. 경로 사용 규칙
+- ✅ **사용**: `/home/aisw/Next_Spring/` (WSL 경로)
+- ❌ **금지**: `/mnt/d/03_Spring/Next_Spring/` (Windows 마운트)
+
+### 2. API 파라미터 처리
+- 필수 파라미터: 직접 추가
+- 선택적 파라미터: null 체크 후 조건부 추가
+- 이유: `queryParam("key", null)` → "?key=null" 문자열 전송됨
+
+### 3. 중복 체크
+- List.contains() 대신 **HashSet** 사용 (O(1) vs O(n))
+- 고유 키 생성: serverId + ":" + characterId
+
+### 4. 병렬 처리
+- 네트워크 I/O 작업은 CompletableFuture 사용
+- CPU 집약적 작업은 순차 처리
+- API Rate Limit 고려 (초당 1000건)
+
+### 5. Lombok 어노테이션
+- DTO: `@Data @Builder @NoArgsConstructor @AllArgsConstructor`
+- Service/Config: `@RequiredArgsConstructor` (final 필드 생성자 주입)
+- 로그: `@Slf4j`
+
+### 6. MongoDB Repository
+- 메서드 이름으로 쿼리 자동 생성
+- 예: `countByJobIdAndJobGrowId()` → `db.collection.count({jobId: ..., jobGrowId: ...})`
+- 복합 조건은 `And` 사용
+
 ## 다음 단계
 
 1. ~~**던파 API 통합**: WebClient로 네오플 API 연동~~ ✅ 완료
-2. **장비 정보 API**: 캐릭터 장착 장비 조회 및 분석
-3. **경매장 API**: 실시간 시세 조회 및 히스토리 추적
-4. **MongoDB 스키마**: 캐릭터/타임라인 데이터 저장 구조
-5. **LLM 통합**: 크롤링 데이터 + 캐릭터 정보 기반 빌드 추천
-6. **RAG 시스템**: 벡터 DB + 검색 시스템
-7. **스케줄러**: 자동 크롤링 + 데이터 갱신
+2. ~~**장비 정보 수집**: 명성 기반 Top 100 캐릭터 수집~~ ✅ 완료
+3. ~~**병렬 처리 최적화**: 3단계 계층 구조 구현~~ ✅ 완료
+4. ~~**장비 통계 API**: 직업별 인기 장비 분석~~ ✅ 완료
+5. ~~**Swagger/OpenAPI**: API 문서 자동 생성~~ ✅ 완료
+6. **프론트엔드 통계 페이지**: 차트 라이브러리로 시각화
+7. **경매장 API**: 실시간 시세 조회 및 히스토리 추적
+8. **LLM 통합**: 크롤링 데이터 + 장비 정보 기반 빌드 추천
+9. **RAG 시스템**: 벡터 DB + 검색 시스템
+10. **스케줄러**: 자동 데이터 갱신 (일 1회)

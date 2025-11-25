@@ -1,0 +1,1202 @@
+{
+    "rows": [
+        {
+            "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+            "jobName": "\uadc0\uac80\uc0ac(\ub0a8)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\uc6e8\ud380\ub9c8\uc2a4\ud130",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\uac80\uc131",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uac80\uc2e0",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \uc6e8\ud380\ub9c8\uc2a4\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc18c\uc6b8\ube0c\ub9c1\uc5b4",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\uc18c\uc6b8\ud14c\uc774\ucee4",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ub2e4\ud06c\ub85c\ub4dc",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc18c\uc6b8\ube0c\ub9c1\uc5b4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ubc84\uc11c\ucee4",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ud5ec\ubca4\ud130",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\ube14\ub7ec\ub4dc \uc774\ube14",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ubc84\uc11c\ucee4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc544\uc218\ub77c",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ub300\uc554\ud751\ucc9c",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uc778\ub2e4\ub77c\ucc9c",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc544\uc218\ub77c"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\uac80\uadc0",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\uc57c\ucc28",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\uc545\uadc0\ub098\ucc30",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \uac80\uadc0"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+            "jobName": "\uaca9\ud22c\uac00(\uc5ec)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ub128\ub9c8\uc2a4\ud130",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ubc31\ud654\uc694\ub780",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc5fc\uc81c \ud3d0\uc6d4\uc218\ud654",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ub128\ub9c8\uc2a4\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc2a4\ud2b8\ub77c\uc774\ucee4",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ucc54\ud53c\uc5b8",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uce74\uc774\uc800",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc2a4\ud2b8\ub77c\uc774\ucee4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\uc2a4\ud2b8\ub9ac\ud2b8\ud30c\uc774\ud130",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ub3c5\uc655",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc6a9\ub3c5\ubb38\uc8fc",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \uc2a4\ud2b8\ub9ac\ud2b8\ud30c\uc774\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uadf8\ub798\ud50c\ub7ec",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ud1a0\ub124\uc774\ub3c4",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uc5bc\ud2f0\ubc0b \ub514\ubc14",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uadf8\ub798\ud50c\ub7ec"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "afdf3b989339de478e85b614d274d1ef",
+            "jobName": "\uac70\ub108(\ub0a8)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ub808\uc778\uc800",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ub370\uc2a4\ud398\ub77c\ub3c4",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\ub808\uc774\ube10",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ub808\uc778\uc800"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\ub7f0\ucc98",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ube14\ub798\uc2a4\ud130",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ub514\uc2a4\ud2b8\ub85c\uc774\uc5b4",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \ub7f0\ucc98"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\uba54\uce74\ub2c9",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ub9c8\uc774\uc2a4\ud130",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\ud504\ub77c\uc784",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \uba54\uce74\ub2c9"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc2a4\ud54f\ud30c\uc774\uc5b4",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\uc81c\ub124\ub7f4",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\ucee4\ub9e8\ub354",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc2a4\ud54f\ud30c\uc774\uc5b4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\uc5b4\uc370\ud2b8",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\uc778\ud2b8\ub8e8\ub354",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\uc5d1\uc2a4\ub9c8\ud0a4\ub098",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \uc5b4\uc370\ud2b8"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "3909d0b188e9c95311399f776e331da5",
+            "jobName": "\ub9c8\ubc95\uc0ac(\uc5ec)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\uc5d8\ub808\uba58\ud0c8\ub9c8\uc2a4\ud130",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\uc544\ud06c\uba54\uc774\uc9c0",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc624\ubc84\ub9c8\uc778\ub4dc",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \uc5d8\ub808\uba58\ud0c8\ub9c8\uc2a4\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc18c\ud658\uc0ac",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ubb38 \uc5e0\ud504\ub808\uc2a4",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uc774\ud074\ub9bd\uc2a4",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc18c\ud658\uc0ac"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ubc30\ud2c0\uba54\uc774\uc9c0",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ubca8\ub77c\ud2b8\ub9ad\uc2a4",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc544\uc288\ud0c0\ub974\ud14c",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ubc30\ud2c0\uba54\uc774\uc9c0"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\ub9c8\ub3c4\ud559\uc790",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ud2b8\ub9ad\uc2a4\ud130",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uc9c0\ub2c8\uc704\uc988",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \ub9c8\ub3c4\ud559\uc790"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\uc778\ucc48\ud2b8\ub9ac\uc2a4",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\ube14\ub799 \uba54\uc774\ub4e0",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\ud5e4\uce74\ud14c",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \uc778\ucc48\ud2b8\ub9ac\uc2a4"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "f6a4ad30555b99b499c07835f87ce522",
+            "jobName": "\ud504\ub9ac\uc2a4\ud2b8(\ub0a8)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ud06c\ub8e8\uc138\uc774\ub354",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ud640\ub9ac\uc624\ub354",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc138\uc778\ud2b8",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ud06c\ub8e8\uc138\uc774\ub354"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc778\ud30c\uc774\ud130",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\uac13\ud578\ub4dc",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uc800\uc2a4\ud2f0\uc2a4",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc778\ud30c\uc774\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ud1f4\ub9c8\uc0ac",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uc6a9\ud22c\uc0ac",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\ud0dc\uc744\uc120\uc778",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ud1f4\ub9c8\uc0ac"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc5b4\ubca4\uc800",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ub460\uc2a4\uac00\ub514\uc5b8",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uc774\ubaa8\ud0c8",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc5b4\ubca4\uc800"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+            "jobName": "\uac70\ub108(\uc5ec)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ub808\uc778\uc800",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ube14\ub7ec\ub514\uc544",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\ud06c\ub9bc\uc2a8\ub85c\uc81c",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ub808\uc778\uc800"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\ub7f0\ucc98",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ud5e4\ube44\ubc30\ub7f4",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uc2a4\ud1b0\ud2b8\ub8e8\ud37c",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \ub7f0\ucc98"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\uba54\uce74\ub2c9",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uba54\ud0c8\ud558\ud2b8",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc635\ud2f0\uba38\uc2a4",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \uba54\uce74\ub2c9"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc2a4\ud54f\ud30c\uc774\uc5b4",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ubc1c\ud0a4\ub9ac",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\ud504\ub808\uc774\uc57c",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc2a4\ud54f\ud30c\uc774\uc5b4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\ud328\ub7ec\uba54\ub515",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\uc2a4\ud0a4\ud37c",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\ucf54\ub85c\ub2c8\uc2a4",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \ud328\ub7ec\uba54\ub515"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+            "jobName": "\ub3c4\uc801",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ub85c\uadf8",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\uc2e4\ubc84\ubb38",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc54c\ud0a4\uc624\ub124",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ub85c\uadf8"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc0ac\ub839\uc220\uc0ac",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ub370\uc2a4\ube0c\ub9c1\uc5b4",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ud0c0\ub098\ud1a0\uc2a4",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc0ac\ub839\uc220\uc0ac"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ucfe0\ub178\uc774\uce58",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uc774\uc988\ub098\ube44",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc2dc\ub77c\ub204\uc774",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ucfe0\ub178\uc774\uce58"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc100\ub3c4\uc6b0\ub304\uc11c",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ub098\uc774\ud2b8\uba54\uc5b4",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uadf8\ub9bc\ub9ac\ud37c",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc100\ub3c4\uc6b0\ub304\uc11c"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+            "jobName": "\uaca9\ud22c\uac00(\ub0a8)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ub128\ub9c8\uc2a4\ud130",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\uad11\ud638\uc81c",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc5fc\ud669 \uad11\ud48d\uc81c\uc6d4",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ub128\ub9c8\uc2a4\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc2a4\ud2b8\ub77c\uc774\ucee4",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ubb34\uadf9",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ud328\ud669",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc2a4\ud2b8\ub77c\uc774\ucee4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\uc2a4\ud2b8\ub9ac\ud2b8\ud30c\uc774\ud130",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ucc9c\uc218\ub098\ud55c",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uba85\uc655",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \uc2a4\ud2b8\ub9ac\ud2b8\ud30c\uc774\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uadf8\ub798\ud50c\ub7ec",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\uc790\uc774\uc5b8\ud2b8",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uadf8\ub79c\ub4dc \ub9c8\uc2a4\ud130",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uadf8\ub798\ud50c\ub7ec"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+            "jobName": "\ub9c8\ubc95\uc0ac(\ub0a8)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\uc5d8\ub808\uba58\ud0c8 \ubc14\uba38",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\uc6cc\ub85d",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc624\ube14\ub9ac\ube44\uc5b8",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \uc5d8\ub808\uba58\ud0c8 \ubc14\uba38"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\ube59\uacb0\uc0ac",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ud504\ub85c\uc98c\ud558\ud2b8",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uc774\ud130\ub110",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \ube59\uacb0\uc0ac"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ube14\ub7ec\ub4dc \uba54\uc774\uc9c0",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ubc40\ud30c\uc774\uc5b4",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\ubc40\ud30c\uc774\uc5b4 \ub85c\ub4dc",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ube14\ub7ec\ub4dc \uba54\uc774\uc9c0"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc2a4\uc704\ud504\ud2b8 \ub9c8\uc2a4\ud130",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\uc2a4\ud1b0\ube0c\ub9c1\uc5b4",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uc544\uc774\uc62c\ub85c\uc2a4",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc2a4\uc704\ud504\ud2b8 \ub9c8\uc2a4\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\ub514\uba58\uc158\uc6cc\ucee4",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\uc774\ub808\uade4\ub7ec",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\uc5b4\uc13c\uc158",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \ub514\uba58\uc158\uc6cc\ucee4"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "17e417b31686389eebff6d754c3401ea",
+            "jobName": "\ub2e4\ud06c\ub098\uc774\ud2b8",
+            "rows": [
+                {
+                    "jobGrowId": "4fdee159d5aa8874a1459861ced676ec",
+                    "jobGrowName": "\uc790\uac011",
+                    "next": {
+                        "jobGrowId": "da6a126f45370e1a4cbbe8823c6c35be",
+                        "jobGrowName": "\uc790\uac012",
+                        "next": {
+                            "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+                            "jobGrowName": "\u771e \ub2e4\ud06c\ub098\uc774\ud2b8"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "b522a95d819a5559b775deb9a490e49a",
+            "jobName": "\ud06c\ub9ac\uc5d0\uc774\ud130",
+            "rows": [
+                {
+                    "jobGrowId": "4fdee159d5aa8874a1459861ced676ec",
+                    "jobGrowName": "\uc790\uac011",
+                    "next": {
+                        "jobGrowId": "da6a126f45370e1a4cbbe8823c6c35be",
+                        "jobGrowName": "\uc790\uac012",
+                        "next": {
+                            "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+                            "jobGrowName": "\u771e \ud06c\ub9ac\uc5d0\uc774\ud130"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "1645c45aabb008c98406b3a16447040d",
+            "jobName": "\uadc0\uac80\uc0ac(\uc5ec)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\uc18c\ub4dc\ub9c8\uc2a4\ud130",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ub178\ube14\ub808\uc2a4",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\ub9c8\uc81c\uc2a4\ud2f0",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \uc18c\ub4dc\ub9c8\uc2a4\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\ub2e4\ud06c\ud15c\ud50c\ub7ec",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\uc554\uc81c",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ub124\uba54\uc2dc\uc2a4",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \ub2e4\ud06c\ud15c\ud50c\ub7ec"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ub370\ubaac\uc2ac\ub808\uc774\uc5b4",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uac80\ub9c8",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\ub514\uc5b4\uc0ac\uc774\ub4dc",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ub370\ubaac\uc2ac\ub808\uc774\uc5b4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\ubca0\uac00\ubcf8\ub4dc",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\uac80\ud638",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uac80\uc81c",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \ubca0\uac00\ubcf8\ub4dc"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\ube14\ub808\uc774\ub4dc",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\ub9ac\ubca8\ub9ac\uc628",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\ubca4\ub370\ud0c0",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \ube14\ub808\uc774\ub4dc"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+            "jobName": "\ub098\uc774\ud2b8",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\uc5d8\ube10\ub098\uc774\ud2b8",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ud53c\uc2a4\uba54\uc774\ucee4",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uac00\uc774\uc544",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \uc5d8\ube10\ub098\uc774\ud2b8"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uce74\uc624\uc2a4",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ub9c8\uc655",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ub9c8\uc2e0",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uce74\uc624\uc2a4"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ud314\ub77c\ub518",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uc13c\ud2f0\ub12c",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc138\uc774\ube44\uc5b4",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ud314\ub77c\ub518"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\ub4dc\ub798\uace4\ub098\uc774\ud2b8",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ud0c0\uc774\ub7f0\ud2b8",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\ub4dc\ub808\ub4dc\ub178\ud2b8",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \ub4dc\ub798\uace4\ub098\uc774\ud2b8"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+            "jobName": "\ub9c8\ucc3d\uc0ac",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ubc45\uac00\ub4dc",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ub808\ubc84\ub10c\ud2b8",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc6cc\ub85c\ub4dc",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ubc45\uac00\ub4dc"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\ub4c0\uc5bc\ub9ac\uc2a4\ud2b8",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ud558\uc774\ub79c\ub354",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ub4c0\ub780\ub2ec",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \ub4c0\uc5bc\ub9ac\uc2a4\ud2b8"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ub4dc\ub798\uace0\ub2c8\uc548 \ub79c\uc11c",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ub808\ube44\uc544\ud0c4",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc81c\ub178\uc0ac\uc774\ub354",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ub4dc\ub798\uace0\ub2c8\uc548 \ub79c\uc11c"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\ub2e4\ud06c \ub79c\uc11c",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ub7a8\ud398\uc774\uc800",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\uc5d0\ub808\ubcf4\uc2a4",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \ub2e4\ud06c \ub79c\uc11c"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+            "jobName": "\ud504\ub9ac\uc2a4\ud2b8(\uc5ec)",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ud06c\ub8e8\uc138\uc774\ub354",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\uc5d0\ubc18\uc824\ub9ac\uc2a4\ud2b8",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uc138\ub77c\ud54c",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ud06c\ub8e8\uc138\uc774\ub354"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc774\ub2e8\uc2ec\ud310\uad00",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ud5ec\uce74\uc774\ud2b8",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uc778\ud398\ub974\ub178",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc774\ub2e8\uc2ec\ud310\uad00"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ubb34\ub140",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uc2e0\ub140",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\ucc9c\uc120\ub0ad\ub791",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ubb34\ub140"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\ubbf8\uc2a4\ud2b8\ub9ac\uc2a4",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\uc2e0\uc138\uc774\uc5b4",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\ub9ac\ub514\uba38",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \ubbf8\uc2a4\ud2b8\ub9ac\uc2a4"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+            "jobName": "\ucd1d\uac80\uc0ac",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ud788\ud2b8\ub9e8",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ube45\ubcf4\uc2a4",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\uac13\ud30c\ub354",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ud788\ud2b8\ub9e8"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\uc694\uc6d0",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\uc778\ud3ec\uc11c",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\ub808\ud034\uc5e0",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \uc694\uc6d0"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ud2b8\ub7ec\ube14 \uc288\ud130",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\uc640\uc77c\ub4dc \uce74\ub4dc",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uc5b8\ud130\ucc98\ube14",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ud2b8\ub7ec\ube14 \uc288\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\uc2a4\ud398\uc15c\ub9ac\uc2a4\ud2b8",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\ucf54\uc5b4 \ub9c8\uc2a4\ud130",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\ud328\uc2a4\ud30c\uc778\ub354",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \uc2a4\ud398\uc15c\ub9ac\uc2a4\ud2b8"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "jobId": "b9cb48777665de22c006fabaf9a560b3",
+            "jobName": "\uc544\ucc98",
+            "rows": [
+                {
+                    "jobGrowId": "df3870efe8e8754011cd12fa03cd275f",
+                    "jobGrowName": "\ubba4\uc988",
+                    "next": {
+                        "jobGrowId": "4ec01f4ae3728c080f28a72213b6df10",
+                        "jobGrowName": "\ud5e4\ub4dc\ub77c\uc774\ub108",
+                        "next": {
+                            "jobGrowId": "80ec67d0356defa46a989914caca5820",
+                            "jobGrowName": "\ud2b8\ub80c\ub4dc\uc138\ud130",
+                            "next": {
+                                "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+                                "jobGrowName": "\u771e \ubba4\uc988"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "1ea78ae210f681a799feb4403a5c1e85",
+                    "jobGrowName": "\ud2b8\ub798\ube14\ub7ec",
+                    "next": {
+                        "jobGrowId": "981d675414f83b926db5f54e5347eec0",
+                        "jobGrowName": "\ub4dc\ub9ac\uba38",
+                        "next": {
+                            "jobGrowId": "8022a99e29b5e4845985fe1d79a233f3",
+                            "jobGrowName": "\uc140\ub808\uc2a4\ud2f0\uc5bc",
+                            "next": {
+                                "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+                                "jobGrowName": "\u771e \ud2b8\ub798\ube14\ub7ec"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a9a4ef4552d46e39cf6c874a51126410",
+                    "jobGrowName": "\ud5cc\ud130",
+                    "next": {
+                        "jobGrowId": "460822c3780a9bc3fbe9485cc89c44a4",
+                        "jobGrowName": "\ud638\ud06c \uc544\uc774",
+                        "next": {
+                            "jobGrowId": "15ce2751ab9c8302f39636cdb7c3dcfa",
+                            "jobGrowName": "\uba54\uc774\ube10",
+                            "next": {
+                                "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+                                "jobGrowName": "\u771e \ud5cc\ud130"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "4a1459a4fa3c7f59b6da2e43382ed0b9",
+                    "jobGrowName": "\ube44\uc9c8\ub780\ud14c",
+                    "next": {
+                        "jobGrowId": "faf8fc6f0cd4c0f84f0035e23bd4fa19",
+                        "jobGrowName": "\uc0c8\ube44\uc9c0",
+                        "next": {
+                            "jobGrowId": "64bbd751c0fcae0e74758b871a2296c1",
+                            "jobGrowName": "\ud504\ub808\ub370\ud130",
+                            "next": {
+                                "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+                                "jobGrowName": "\u771e \ube44\uc9c8\ub780\ud14c"
+                            }
+                        }
+                    }
+                },
+                {
+                    "jobGrowId": "a59ba19824dc3292b6075e29b3862ad3",
+                    "jobGrowName": "\ud0a4\uba54\ub77c",
+                    "next": {
+                        "jobGrowId": "a427ec3e94087c64cb4144379c3a0d59",
+                        "jobGrowName": "\ud0a4\ud074\ub86d\uc2a4",
+                        "next": {
+                            "jobGrowId": "3ff5b661925ac59d1ca290b05ca914cc",
+                            "jobGrowName": "\ud558\uc774\ub4dc\ub77c",
+                            "next": {
+                                "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+                                "jobGrowName": "\u771e \ud0a4\uba54\ub77c"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

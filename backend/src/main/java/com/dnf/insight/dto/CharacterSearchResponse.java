@@ -79,5 +79,17 @@ public class CharacterSearchResponse {
          */
         @JsonProperty("fame")
         private Integer fame;
+
+        /**
+         * 모험단명
+         */
+        @JsonProperty("adventureName")
+        private String adventureName;
+
+        /**
+         * 길드명
+         */
+        @JsonProperty("guildName")
+        private String guildName;
     }
 }

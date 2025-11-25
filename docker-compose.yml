@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mongodb:
     image: mongo:7.0
@@ -11,7 +13,6 @@ services:
       MONGO_INITDB_DATABASE: dnf_insight
     volumes:
       - mongodb_data:/data/db
-      - ./mongo-init:/docker-entrypoint-initdb.d:ro
     networks:
       - dnf-network
     healthcheck:
@@ -37,6 +38,29 @@ services:
       timeout: 5s
       retries: 5
 
+  mysql:
+    image: mysql:8.0
+    container_name: dnf-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: dnf_auction
+      MYSQL_USER: dnf
+      MYSQL_PASSWORD: password123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - dnf-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
   backend:
     build:
       context: ./backend
@@ -50,6 +74,10 @@ services:
       SPRING_DATA_MONGODB_DATABASE: dnf_insight
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/dnf_auction?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: dnf
+      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       DNF_API_KEY: ${DNF_API_KEY:-your-api-key-here}
       DNF_API_BASE_URL: https://api.neople.co.kr
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-change-in-production}
@@ -61,6 +89,8 @@ services:
       mongodb:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
     networks:
       - dnf-network
@@ -89,28 +119,6 @@ services:
       - /app/node_modules
       - /app/.next
 
-  crawler:
-    build:
-      context: ./crawler
-      dockerfile: Dockerfile
-    container_name: dnf-crawler
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      MONGODB_URL: mongodb://admin:password123@mongodb:27017/dnf_insight?authSource=admin
-      MONGODB_DB_NAME: dnf_insight
-      CRAWL_INTERVAL_MINUTES: 60
-      TARGET_SITE_URL: https://example-community.com
-      ENVIRONMENT: development
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - dnf-network
-    volumes:
-      - ./crawler:/app
-
 networks:
   dnf-network:
     driver: bridge
@@ -119,4 +127,6 @@ volumes:
   mongodb_data:
     driver: local
   redis_data:
+    driver: local
+  mysql_data:
     driver: local

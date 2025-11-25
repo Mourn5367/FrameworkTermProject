@@ -173,11 +173,11 @@ public class CharacterEquipment {
         private String itemId;
         private String itemName;
         private String itemTypeDetail;
-        private String tuneName;
+        private String tuneName;          // 튠 이름 (예: 새겨진 해일의 기억)
     }
 
     /**
-     * 일반 장비 슬롯 (장비 자체 + 융합석)
+     * 일반 장비 슬롯 (장비 자체 + 융합석 + 세트)
      */
     @Data
     @Builder
@@ -186,6 +186,8 @@ public class CharacterEquipment {
     public static class EquipmentSlot {
         private String itemId;           // 장비 자체
         private String itemName;         // 장비 자체
+        private String setItemId;        // 세트 아이템 ID
+        private String setItemName;      // 세트 아이템 이름
         private String upgradeItemId;    // 융합석 (upgradeInfo)
         private String upgradeItemName;  // 융합석 (upgradeInfo)
     }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Footer from '@/components/layout/Footer';
 import SearchSection from '@/components/search/SearchSection';
@@ -8,9 +9,11 @@ import NoticeSection, { Notice } from '@/components/notice/NoticeSection';
 import UpdateSection, { Update } from '@/components/notice/UpdateSection';
 
 export default function Home() {
+  const router = useRouter();
+
   const handleSearch = (server: string, nickname: string) => {
-    console.log('검색:', server, nickname);
-    // TODO: 실제 검색 로직 구현
+    // 검색 페이지로 이동
+    router.push(`/search?server=${encodeURIComponent(server)}&name=${encodeURIComponent(nickname)}`);
   };
 
   // 아이템 시세 데이터

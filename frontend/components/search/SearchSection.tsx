@@ -24,9 +24,22 @@ export default function SearchSection({ onSearch }: SearchSectionProps) {
     '바칼'
   ];
 
+  // 한글 서버명 → 영문 서버 ID 매핑
+  const serverIdMap: { [key: string]: string } = {
+    '카인': 'cain',
+    '디레지에': 'diregie',
+    '시로코': 'siroco',
+    '프레이': 'prey',
+    '카시야스': 'casillas',
+    '힐더': 'hilder',
+    '안톤': 'anton',
+    '바칼': 'bakal'
+  };
+
   const handleSearch = () => {
     if (onSearch) {
-      onSearch(selectedServer, nickname);
+      const serverId = serverIdMap[selectedServer] || selectedServer.toLowerCase();
+      onSearch(serverId, nickname);
     }
   };
 

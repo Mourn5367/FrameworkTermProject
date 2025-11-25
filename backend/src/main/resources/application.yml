@@ -5,6 +5,21 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/dnf_auction?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${SPRING_DATASOURCE_USERNAME:dnf}
+    password: ${SPRING_DATASOURCE_PASSWORD:password123}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://admin:password123@localhost:27017/dnf_insight?authSource=admin}
@@ -21,6 +36,9 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  tomcat:
+    uri-encoding: UTF-8
+    relaxed-query-chars: '[,],{,},|'
 
 # DnF API 설정
 dnf:
@@ -61,3 +79,17 @@ logging:
     org.springframework.data.mongodb: DEBUG
   file:
     name: logs/dnf-insight.log
+
+# Swagger/OpenAPI
+springdoc:
+  api-docs:
+    path: /v3/api-docs                    # OpenAPI JSON 경로
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html                # Swagger UI 경로
+    enabled: true
+    tags-sorter: alpha                    # 태그 알파벳 정렬
+    operations-sorter: alpha              # API 알파벳 정렬
+    display-request-duration: true        # 요청 시간 표시
+    doc-expansion: none                   # 기본적으로 접혀있음
+  show-actuator: false                    # Actuator 엔드포인트 숨김

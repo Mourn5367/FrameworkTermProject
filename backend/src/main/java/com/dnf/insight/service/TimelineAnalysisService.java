@@ -108,11 +108,31 @@ public class TimelineAnalysisService {
 
         int totalEntries = dungeonEntries.values().stream().mapToInt(Integer::intValue).sum();
 
+        // 고정된 주간 던전 목록
+        List<String> weeklyDungeonNames = List.of(
+                "베누스",
+                "만들어진 신 나벨",
+                "이내 황혼전"
+        );
+
+        // 던전 클리어 상태 목록 생성
+        List<WeeklyDungeonStatus.DungeonClearStatus> dungeonStatuses = weeklyDungeonNames.stream()
+                .map(dungeonName -> {
+                    Integer count = dungeonEntries.getOrDefault(dungeonName, 0);
+                    return WeeklyDungeonStatus.DungeonClearStatus.builder()
+                            .name(dungeonName)
+                            .cleared(count > 0)
+                            .count(count)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         log.info("✅ Weekly dungeon analysis complete: {} entries, thisWeek items: {}, lastWeek items: {}",
                 totalEntries, thisWeekItemsByGrade, lastWeekItemsByGrade);
 
         return WeeklyDungeonStatus.builder()
                 .weekStartTime(currentWeekStart)
+                .dungeons(dungeonStatuses)
                 .dungeonEntries(dungeonEntries)
                 .totalEntries(totalEntries)
                 .thisWeekItemsByGrade(thisWeekItemsByGrade)

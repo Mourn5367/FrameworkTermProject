@@ -44,6 +44,11 @@ public interface CharacterEquipmentRepository extends MongoRepository<CharacterE
     long countByJobIdAndJobGrowId(String jobId, String jobGrowId);
 
     /**
+     * jobId + jobGrowId 조합으로 모든 장비 조회 (통계용)
+     */
+    List<CharacterEquipment> findByJobIdAndJobGrowId(String jobId, String jobGrowId);
+
+    /**
      * jobId + jobGrowId 조합으로 모든 장비 삭제 (재수집 전)
      */
     void deleteByJobIdAndJobGrowId(String jobId, String jobGrowId);

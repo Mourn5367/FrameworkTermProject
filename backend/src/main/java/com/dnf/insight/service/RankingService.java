@@ -1,14 +1,15 @@
 package com.dnf.insight.service;
 
 import com.dnf.insight.dto.CharacterFameResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class RankingService {
     private final DnfApiClient dnfApiClient;
     private final EquipmentService equipmentService;
     private final com.dnf.insight.repository.CharacterEquipmentRepository equipmentRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * 직업별 상위 100명 캐릭터 수집
@@ -36,7 +38,8 @@ public class RankingService {
      * @param targetCount 목표 캐릭터 수 (기본: 100)
      * @return 수집된 캐릭터 목록
      */
-    public List<CharacterFameResponse.CharacterRow> collectTopCharacters(
+    public List<CharacterFameResponse.CharacterRow> collectT
+    opCharacters(
             String jobId, String jobGrowId, int targetCount) {
 
         log.info("🎯 Collecting top {} characters for jobGrowId={}", targetCount, jobGrowId);
@@ -60,17 +63,40 @@ public class RankingService {
                 break;
             }
 
-            // 중복 제거하며 추가
+            // ========================================
+            // 중복 제거하며 캐릭터 수집
+            // ========================================
+            // API 응답에서 각 캐릭터를 순회하며 중복 없이 목록에 추가
+            //
+            // 왜 중복 체크가 필요한가?
+            // - 던파 API는 명성 범위(minFame~maxFame)로 조회하는데,
+            //   명성 범위가 겹치면 같은 캐릭터가 여러 번 응답에 포함될 수 있음
+            //
+            // 예시:
+            // 1차 호출: minFame=70000, maxFame=72000 → 캐릭터A(명성 70500) 포함
+            // 2차 호출: minFame=68000, maxFame=70000 → 캐릭터A(명성 70500) 또 포함! (중복!)
+            //
+            // 해결 방법:
+            // - serverId + characterId 조합으로 고유 키 생성
+            // - HashSet(collectedIds)으로 O(1) 시간복잡도로 중복 체크
             for (CharacterFameResponse.CharacterRow character : response.getRows()) {
+                // 고유 키 생성: "cain:abc123def456" 형식
+                // serverId와 characterId 조합으로 캐릭터를 유일하게 식별
                 String uniqueKey = character.getServerId() + ":" + character.getCharacterId();
-                if (!collectedIds.contains(uniqueKey)) {
-                    allCharacters.add(character);
-                    collectedIds.add(uniqueKey);
 
+                // HashSet.contains()로 이미 수집한 캐릭터인지 확인 (O(1) 시간복잡도)
+                if (!collectedIds.contains(uniqueKey)) {
+                    // 중복이 아니면 목록에 추가
+                    allCharacters.add(character);
+                    collectedIds.add(uniqueKey);  // 다음 중복 체크를 위해 Set에도 추가
+
+                    // 목표 개수(targetCount) 달성 시 즉시 종료
+                    // break로 for문 탈출 → 불필요한 반복 방지
                     if (allCharacters.size() >= targetCount) {
                         break;
                     }
                 }
+                // 중복인 경우: 아무것도 하지 않고 다음 캐릭터로 넘어감
             }
 
             log.info("📊 Collected: {}/{} (retry: {})", allCharacters.size(), targetCount, retryCount);
