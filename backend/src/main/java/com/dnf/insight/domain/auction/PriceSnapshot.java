@@ -30,16 +30,16 @@ public class PriceSnapshot {
     @Column(nullable = false, length = 100)
     private String itemName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime snapshotTime;
 
     // 현재 매물 통계
-    private Long avgPrice;
-    private Long minPrice;
-    private Long maxPrice;
-    private Integer itemCount;
+    private Long avgPrice;      // 평균가 (unitPrice 기준)
+    private Long minPrice;      // 최저가 (unitPrice 기준)
+    private Integer itemCount;  // 등록 물량
 
     // 거래 통계 (최근 24시간)
-    private Long soldAvgPrice;
-    private Integer soldCount;
+    private Long soldAvgPrice;  // 거래 평균가
+    private Long soldMaxPrice;  // 거래 최고가 (실제 팔린 최고가)
+    private Integer soldCount;  // 거래 건수
 }

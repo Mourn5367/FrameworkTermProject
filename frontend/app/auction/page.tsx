@@ -1,248 +1,520 @@
 'use client';
 
-import React, { useState } from 'react';
-import Logo from '@/components/layout/Logo';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Footer from '@/components/layout/Footer';
+import SearchSection from '@/components/search/SearchSection';
+import AuctionTableWithAccordion from '@/components/auction/AuctionTableWithAccordion';
+import AuctionTableSkeleton from '@/components/auction/AuctionTableSkeleton';
+import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const API_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? `http://${window.location.hostname}:8080`
+  : 'http://localhost:8080';
+
+interface TrackedItem {
+  id: number;
+  itemId: string;
+  itemName: string;
+  itemImageUrl: string;
+  addedAt: string;
+}
+
+interface ChartData {
+  itemId: string;
+  itemName: string;
+  labels: string[];
+  avgPrices: number[];
+  minPrices: number[];
+  soldAvgPrices: (number | null)[];
+  soldMaxPrices: (number | null)[];
+  soldCounts: number[];
+  itemCounts: number[];
+}
+
+interface AuctionItem {
+  id: number;
+  auctionNo: number;
+  regDate: string;
+  count: number;
+  currentPrice: number;
+  unitPrice: number;
+}
+
+interface SoldHistory {
+  id: number;
+  soldDate: string;
+  count: number;
+  price: number;
+  unitPrice: number;
+}
 
 export default function AuctionPage() {
-  const [expandedItem, setExpandedItem] = useState<number | null>(null);
+  const router = useRouter();
+  const [trackedItems, setTrackedItems] = useState<TrackedItem[]>([]);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<{ [key: string]: ChartData }>({});
+  const [auctionItems, setAuctionItems] = useState<{ [key: string]: AuctionItem[] }>({});
+  const [soldHistory, setSoldHistory] = useState<{ [key: string]: SoldHistory[] }>({});
+  const [chartInterval, setChartInterval] = useState<{ [key: string]: number }>({});
+  const chartRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const items = [
-    {
-      id: 1,
-      icon: '⚔️',
-      name: '누트럼 우측 회심표 밀으로 바껴먼서 밀으로 창 스르륵 생길',
-      category: '장비 · 무기',
-      price: 12500000,
-      weekAgoPrice: 11800000,
-      yesterdayPrice: 12300000,
-    },
-    {
-      id: 2,
-      icon: '🛡️',
-      name: '가격 최저가, 평균가, 최대가 워으선 차트',
-      category: '장비 · 방어구',
-      price: 8750000,
-      weekAgoPrice: 9200000,
-      yesterdayPrice: 8900000,
-    },
-  ];
+  const MAX_CANDLES = 20; // 최대 캔들 표시 개수
 
-  const calculateChange = (current: number, previous: number) => {
-    const change = ((current - previous) / previous) * 100;
-    return {
-      percentage: Math.abs(change).toFixed(1),
-      isPositive: change > 0,
-    };
+  // 차트 데이터 메모이제이션 (chartData와 interval이 변경될 때만 재계산)
+  const memoizedChartDisplayData = useMemo(() => {
+    const result: { [key: string]: any[] } = {};
+
+    Object.keys(chartData).forEach(itemId => {
+      const data = chartData[itemId];
+      if (!data) return;
+
+      const interval = chartInterval[itemId] || 3;
+      const aggregatedData: any[] = [];
+
+      for (let i = 0; i < data.labels.length; i += interval) {
+        const endIdx = Math.min(i + interval, data.labels.length);
+        if (endIdx - i < interval && i > 0) break;
+
+        const rangeData = {
+          labels: data.labels.slice(i, endIdx),
+          minPrices: data.minPrices.slice(i, endIdx),
+          soldAvgPrices: data.soldAvgPrices.slice(i, endIdx),
+          soldMaxPrices: data.soldMaxPrices.slice(i, endIdx),
+          itemCounts: data.itemCounts.slice(i, endIdx),
+          soldCounts: data.soldCounts.slice(i, endIdx),
+        };
+
+        const date = new Date(rangeData.labels[rangeData.labels.length - 1]);
+        const validMinPrices = rangeData.minPrices.filter(p => p && p > 0);
+        const validAvgPrices = rangeData.soldAvgPrices.filter(p => p && p > 0);
+        const validMaxPrices = rangeData.soldMaxPrices.filter(p => p && p > 0);
+        const totalItemCount = rangeData.itemCounts.reduce((sum, c) => sum + (c || 0), 0);
+        const totalSoldCount = rangeData.soldCounts.reduce((sum, c) => sum + (c || 0), 0);
+
+        // 평균가 계산
+        const avgPrice = validAvgPrices.length > 0
+          ? Math.round(validAvgPrices.reduce((a, b) => a + b, 0) / validAvgPrices.length)
+          : null;
+
+        // 최고가: 평균가의 10배 이하인 정상 거래만 필터링
+        const normalMaxPrices = avgPrice
+          ? validMaxPrices.filter(p => p <= avgPrice * 10)
+          : validMaxPrices;
+
+        // 원본 최고가 (이상치 포함)
+        const maxPriceWithOutlier = validMaxPrices.length > 0 ? Math.max(...validMaxPrices) : null;
+
+        // 정상 최고가 (이상치 제외)
+        const maxPriceNormal = normalMaxPrices.length > 0 ? Math.max(...normalMaxPrices) : null;
+
+        aggregatedData.push({
+          time: date.toLocaleString('ko-KR', {
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }),
+          최저가: validMinPrices.length > 0 ? Math.min(...validMinPrices) : null,
+          거래평균가: avgPrice,
+          거래최고가_원본: maxPriceWithOutlier, // 툴팁용 (이상치 포함)
+          거래최고가: maxPriceNormal, // 차트 선용 (이상치 제외)
+          이상치표시: (maxPriceWithOutlier && maxPriceNormal && maxPriceWithOutlier !== maxPriceNormal) ? maxPriceNormal : null,
+          등록물량: Math.round(totalItemCount / interval),
+          거래량: totalSoldCount,
+        });
+      }
+
+      // 최신 20개만
+      const totalCandles = aggregatedData.length;
+      const startIdx = Math.max(0, totalCandles - MAX_CANDLES);
+      result[itemId] = aggregatedData.slice(startIdx);
+    });
+
+    return result;
+  }, [chartData, chartInterval]);
+
+  // 검색 핸들러
+  const handleSearch = (server: string, nickname: string) => {
+    router.push(`/search?server=${encodeURIComponent(server)}&name=${encodeURIComponent(nickname)}`);
   };
 
+  // 차트 영역에서 페이지 스크롤 차단 및 간격 조절 (passive: false 사용)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 어느 차트에서 이벤트가 발생했는지 찾기
+      for (const [itemId, element] of Object.entries(chartRefs.current)) {
+        if (element && element.contains(e.target as Node)) {
+          // React 이벤트로 변환하여 handleChartWheel 호출
+          const intervals = [3, 5, 15, 30, 180, 360, 720, 5040, 21600, 64800, 129600, 262800]; // 5분, 10분, 30분, 1시간, 6시간, 12시간, 1일, 1주일, 1개월, 3개월, 6개월, 1년
+          const currentInterval = chartInterval[itemId] || 3;
+          const currentIndex = intervals.indexOf(currentInterval);
+
+          let newIndex;
+          if (e.deltaY > 0) {
+            newIndex = Math.min(currentIndex + 1, intervals.length - 1);
+          } else {
+            newIndex = Math.max(currentIndex - 1, 0);
+          }
+
+          setChartInterval(prev => ({ ...prev, [itemId]: intervals[newIndex] }));
+          break;
+        }
+      }
+    };
+
+    const chartElements = Object.values(chartRefs.current).filter(el => el !== null);
+    chartElements.forEach(el => {
+      if (el) {
+        el.addEventListener('wheel', handleWheel, { passive: false });
+      }
+    });
+
+    return () => {
+      chartElements.forEach(el => {
+        if (el) {
+          el.removeEventListener('wheel', handleWheel);
+        }
+      });
+    };
+  }, [expandedItem, chartData, chartInterval]);
+
+  // Tracked Items 로드 및 실시간 갱신
+  useEffect(() => {
+    loadTrackedItems();
+
+    // 2분마다 자동 갱신
+    const interval = setInterval(() => {
+      loadTrackedItems();
+    }, 120000); // 120초 = 2분
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadTrackedItems = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/auction/tracked-items`);
+      const data = await res.json();
+      setTrackedItems(data);
+
+      // URL 파라미터 확인
+      const params = new URLSearchParams(window.location.search);
+      const urlItemId = params.get('itemId');
+
+      if (urlItemId && data.length > 0) {
+        // URL 파라미터가 있으면 해당 아이템만 우선 로드
+        await loadPriorityItemData(urlItemId);
+
+        // 나머지 아이템은 백그라운드에서 로드
+        loadAllChartData(data.filter((item: TrackedItem) => item.itemId !== urlItemId));
+      } else {
+        // URL 파라미터 없으면 모든 아이템 차트 데이터 미리 로드
+        if (data && data.length > 0) {
+          loadAllChartData(data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load tracked items:', error);
+    }
+  };
+
+  // 우선순위 아이템 데이터 로드 (차트 + 등록물량 + 최근거래 동시 로드)
+  const loadPriorityItemData = async (itemId: string) => {
+    try {
+      // 3개 API를 병렬로 동시 호출
+      const [chartRes, itemsRes, soldRes] = await Promise.all([
+        fetch(`${API_URL}/api/auction/items/${itemId}/chart?days=7`),
+        fetch(`${API_URL}/api/auction/items/${itemId}`),
+        fetch(`${API_URL}/api/auction/items/${itemId}/sold-history?limit=10`)
+      ]);
+
+      // 차트 데이터
+      if (chartRes.ok) {
+        const chartData = await chartRes.json();
+        setChartData(prev => ({ ...prev, [itemId]: chartData }));
+      }
+
+      // 현재 매물
+      if (itemsRes.ok) {
+        const items = await itemsRes.json();
+        setAuctionItems(prev => ({ ...prev, [itemId]: items }));
+      }
+
+      // 판매 내역
+      if (soldRes.ok) {
+        const sold = await soldRes.json();
+        setSoldHistory(prev => ({ ...prev, [itemId]: sold }));
+      }
+
+      // 데이터 로드 완료 후 아코디언 열기
+      setExpandedItem(itemId);
+    } catch (error) {
+      console.error(`Failed to load priority item data for ${itemId}:`, error);
+    }
+  };
+
+  // 특정 아이템의 차트 데이터 로드
+  const loadChartData = async (itemId: string, days: number) => {
+    try {
+      const chartRes = await fetch(`${API_URL}/api/auction/items/${itemId}/chart?days=${days}`);
+      if (chartRes.ok) {
+        const data = await chartRes.json();
+        setChartData(prev => ({ ...prev, [itemId]: data }));
+      }
+    } catch (error) {
+      console.error(`Failed to load chart data for ${itemId}:`, error);
+    }
+  };
+
+  // 모든 아이템의 차트 데이터 미리 로드
+  const loadAllChartData = async (items: TrackedItem[]) => {
+    const promises = items.map(async (item) => {
+      try {
+        const chartRes = await fetch(`${API_URL}/api/auction/items/${item.itemId}/chart?days=7`);
+        if (chartRes.ok) {
+          const data = await chartRes.json();
+          return { itemId: item.itemId, data };
+        }
+      } catch (error) {
+        console.error(`Failed to load chart data for ${item.itemId}:`, error);
+      }
+      return null;
+    });
+
+    const results = await Promise.all(promises);
+
+    // 기존 chartData를 덮어쓰지 않고 병합
+    results.forEach((result) => {
+      if (result) {
+        setChartData(prev => ({ ...prev, [result.itemId]: result.data }));
+      }
+    });
+  };
+
+  // 아이템 확장 시 상세 데이터 로드
+  const handleExpandItem = async (itemId: string) => {
+    if (expandedItem === itemId) {
+      setExpandedItem(null);
+      return;
+    }
+
+    setExpandedItem(itemId);
+
+    // 차트 데이터, 현재 매물, 판매 내역을 병렬로 로드
+    const promises = [];
+
+    // 차트 데이터가 없으면 로드
+    if (!chartData[itemId]) {
+      promises.push(
+        fetch(`${API_URL}/api/auction/items/${itemId}/chart?days=7`)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data) {
+              setChartData(prev => ({ ...prev, [itemId]: data }));
+            }
+          })
+          .catch(err => console.error(`Failed to load chart data for ${itemId}:`, err))
+      );
+    }
+
+    // 등록 물량이 없으면 로드
+    if (!auctionItems[itemId]) {
+      promises.push(
+        fetch(`${API_URL}/api/auction/items/${itemId}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(items => {
+            if (items) {
+              setAuctionItems(prev => ({ ...prev, [itemId]: items }));
+            }
+          })
+          .catch(err => console.error(`Failed to load auction items for ${itemId}:`, err))
+      );
+    }
+
+    // 최근 거래가 없으면 로드
+    if (!soldHistory[itemId]) {
+      promises.push(
+        fetch(`${API_URL}/api/auction/items/${itemId}/sold-history?limit=10`)
+          .then(res => res.ok ? res.json() : null)
+          .then(sold => {
+            if (sold) {
+              setSoldHistory(prev => ({ ...prev, [itemId]: sold }));
+            }
+          })
+          .catch(err => console.error(`Failed to load sold history for ${itemId}:`, err))
+      );
+    }
+
+    // 모든 요청을 병렬로 실행
+    if (promises.length > 0) {
+      await Promise.all(promises);
+    }
+  };
+
+  // 가격 포맷 (1원 단위까지 표시)
   const formatPrice = (price: number) => {
+    return price.toLocaleString() + '골드';
+  };
+
+  // 차트 Y축 전용 포맷 (자세하게 표시)
+  const formatChartPrice = (price: number) => {
     return price.toLocaleString();
+  };
+
+  // 시간 경과 표시
+  const getTimeAgo = (dateStr: string) => {
+    const now = new Date();
+    const past = new Date(dateStr);
+    const diffMs = now.getTime() - past.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    return `${diffDays}일 전`;
+  };
+
+  // 차트용 데이터 변환 (메모이제이션된 데이터 반환)
+  const getChartDataForDisplay = (itemId: string) => {
+    return memoizedChartDisplayData[itemId] || [];
+  };
+
+  // 가격 Y축 domain (왼쪽)
+  const getPriceYAxisDomain = (itemId: string): [number, number] => {
+    const displayData = getChartDataForDisplay(itemId);
+    if (!displayData || displayData.length === 0) {
+      return [0, 1];
+    }
+
+    // 차트에 표시되는 가격만 수집 (이상치 필터링된 데이터)
+    const allPrices: number[] = [];
+    displayData.forEach(d => {
+      if (d.최저가 && d.최저가 > 0) allPrices.push(d.최저가);
+      if (d.거래평균가 && d.거래평균가 > 0) allPrices.push(d.거래평균가);
+      if (d.거래최고가 && d.거래최고가 > 0) allPrices.push(d.거래최고가);
+    });
+
+    if (allPrices.length === 0) return [0, 1];
+
+    const minPrice = Math.min(...allPrices);
+    const maxPrice = Math.max(...allPrices);
+    const range = maxPrice - minPrice;
+    const padding = range * 0.1;
+
+    return [
+      Math.max(0, Math.floor(minPrice - padding)),
+      Math.ceil(maxPrice + padding)
+    ];
+  };
+
+  // 등록물량 Y축 domain (오른쪽 1)
+  const getItemCountYAxisDomain = (itemId: string): [number, number] => {
+    const displayData = getChartDataForDisplay(itemId);
+    if (!displayData || displayData.length === 0) {
+      return [0, 'auto' as any];
+    }
+
+    const itemCounts = displayData.map(d => d.등록물량 || 0).filter(v => v > 0);
+    if (itemCounts.length === 0) return [0, 'auto' as any];
+
+    const maxCount = Math.max(...itemCounts);
+    return [0, Math.ceil(maxCount * 1.1)];
+  };
+
+  // 거래량 Y축 domain (오른쪽 2)
+  const getSoldCountYAxisDomain = (itemId: string): [number, number] => {
+    const displayData = getChartDataForDisplay(itemId);
+    if (!displayData || displayData.length === 0) {
+      return [0, 'auto' as any];
+    }
+
+    const soldCounts = displayData.map(d => d.거래량 || 0).filter(v => v > 0);
+    if (soldCounts.length === 0) return [0, 'auto' as any];
+
+    const maxCount = Math.max(...soldCounts);
+    return [0, Math.ceil(maxCount * 1.5)]; // 1.5배 여유로 선이 잘 보이도록
+  };
+
+  // 1주 전, 어제 가격 계산 (최저가 기준)
+  const getPriceComparison = (itemId: string) => {
+    const data = chartData[itemId];
+    if (!data || data.minPrices.length === 0) {
+      return { current: 0, weekAgo: 0, yesterday: 0, weekChange: 0, dayChange: 0, totalItems: 0 };
+    }
+
+    // 현재 최저가
+    const current = data.minPrices[data.minPrices.length - 1];
+
+    // 1주 전 최저가 (7일 × 720회/일 = 5040 인덱스 전, 없으면 처음)
+    const weekAgoIdx = Math.max(0, data.minPrices.length - 5040);
+    const weekAgo = data.minPrices[weekAgoIdx];
+
+    // 어제 최저가 (720회/일, 없으면 처음)
+    const yesterdayIdx = Math.max(0, data.minPrices.length - 720);
+    const yesterday = data.minPrices[yesterdayIdx];
+
+    const weekChange = weekAgo > 0 ? ((current - weekAgo) / weekAgo) * 100 : 0;
+    const dayChange = yesterday > 0 ? ((current - yesterday) / yesterday) * 100 : 0;
+
+    // 현재 등록된 총 물량
+    const totalItems = data.itemCounts[data.itemCounts.length - 1] || 0;
+
+    return { current, weekAgo, yesterday, weekChange, dayChange, totalItems };
   };
 
   return (
     <div className="page-wrapper bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1">
-        <div className="app-container">
-          <Logo />
+        <div className="app-container py-8">
+          {/* 로고 */}
+          <div className="text-center mb-6">
+            <Image
+              src="/images/logo.png"
+              alt="DunSight"
+              width={300}
+              height={80}
+              className="mx-auto cursor-pointer"
+              priority
+              onClick={() => router.push('/')}
+            />
+          </div>
 
-        {/* 아이템 테이블 */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-              <tr>
-                <th className="py-2.5 px-4 text-left font-bold">아이콘</th>
-                <th className="py-2.5 px-4 text-left font-bold">이름</th>
-                <th className="py-2.5 px-4 text-center font-bold">가격</th>
-                <th className="py-2.5 px-4 text-center font-bold">1주전 평균 가격</th>
-                <th className="py-2.5 px-4 text-center font-bold">어제 대비 현재 가격</th>
-                <th className="py-2.5 px-4 text-center font-bold w-12"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => {
-                const weekChange = calculateChange(item.price, item.weekAgoPrice);
-                const dayChange = calculateChange(item.price, item.yesterdayPrice);
-                const isExpanded = expandedItem === item.id;
+          {/* 검색 섹션 */}
+          <SearchSection onSearch={handleSearch} />
 
-                return (
-                  <React.Fragment key={item.id}>
-                    {/* 아이템 행 */}
-                    <tr
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => setExpandedItem(isExpanded ? null : item.id)}
-                    >
-                      <td className="py-3 px-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                          <span className="text-xl">{item.icon}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-gray-800">{item.name}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{item.category}</div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="font-bold text-base text-gray-800">{formatPrice(item.price)}</div>
-                        <div className="text-xs text-gray-500">골드</div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="font-bold text-gray-700">{formatPrice(item.weekAgoPrice)}</div>
-                        <div className={`text-xs font-medium ${weekChange.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                          {weekChange.isPositive ? '▲' : '▼'} {weekChange.percentage}%
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="font-bold text-gray-700">{formatPrice(item.yesterdayPrice)}</div>
-                        <div className={`text-xs font-medium ${dayChange.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                          {dayChange.isPositive ? '▲' : '▼'} {dayChange.percentage}%
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-all">
-                          <svg
-                            className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-
-                    {/* 차트 행 (확장 시) */}
-                    {isExpanded && (
-                      <tr className="bg-gray-50">
-                        <td colSpan={6} className="p-0">
-                          <div className="px-4 py-5 animate-[fadeIn_0.3s_ease-in-out]">
-                            <div className="bg-white rounded-xl shadow-lg p-4">
-                              <h3 className="text-base font-bold text-gray-800 mb-3">{item.name} - 가격 추이</h3>
-
-                              {/* 가격 추이 차트 */}
-                              <div className="h-48 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl mb-4">
-                                <div className="text-center">
-                                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-3">
-                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                                    </svg>
-                                  </div>
-                                  <p className="text-sm text-gray-700 font-medium">가격 추이 차트 (최저가, 평균가, 최대가)</p>
-                                  <p className="text-xs text-gray-500 mt-1">실제 데이터 연동 시 차트가 표시됩니다</p>
-                                </div>
-                              </div>
-
-                              {/* 등록 물량 및 최근 거래 */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* 등록 물량 */}
-                                <div>
-                                  <h4 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
-                                    등록 물량 (가격 오름차순)
-                                  </h4>
-                                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                                    <table className="w-full text-xs">
-                                      <thead className="bg-gray-100">
-                                        <tr>
-                                          <th className="py-1.5 px-2 text-left font-semibold text-gray-700">등록시간</th>
-                                          <th className="py-1.5 px-2 text-center font-semibold text-gray-700">물량</th>
-                                          <th className="py-1.5 px-2 text-right font-semibold text-gray-700">가격</th>
-                                          <th className="py-1.5 px-2 text-right font-semibold text-gray-700">개당</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-gray-100">
-                                        {[
-                                          { time: '10초 전', quantity: 5, price: 62500000, unit: 12500000 },
-                                          { time: '2분 전', quantity: 10, price: 130000000, unit: 13000000 },
-                                          { time: '5분 전', quantity: 3, price: 40500000, unit: 13500000 },
-                                          { time: '12분 전', quantity: 8, price: 112000000, unit: 14000000 },
-                                          { time: '25분 전', quantity: 15, price: 217500000, unit: 14500000 },
-                                          { time: '1시간 전', quantity: 7, price: 105000000, unit: 15000000 },
-                                          { time: '2시간 전', quantity: 20, price: 310000000, unit: 15500000 },
-                                          { time: '3시간 전', quantity: 12, price: 192000000, unit: 16000000 },
-                                          { time: '5시간 전', quantity: 6, price: 99000000, unit: 16500000 },
-                                          { time: '8시간 전', quantity: 4, price: 68000000, unit: 17000000 },
-                                        ].map((listing, idx) => (
-                                          <tr key={idx} className="hover:bg-blue-50 transition-colors">
-                                            <td className="py-1.5 px-2 text-gray-600">{listing.time}</td>
-                                            <td className="py-1.5 px-2 text-center font-medium text-gray-800">{listing.quantity}개</td>
-                                            <td className="py-1.5 px-2 text-right font-semibold text-gray-800">{listing.price.toLocaleString()}</td>
-                                            <td className="py-1.5 px-2 text-right text-blue-600 font-semibold">{listing.unit.toLocaleString()}</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-
-                                {/* 최근 거래 */}
-                                <div>
-                                  <h4 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-                                    최근 거래
-                                  </h4>
-                                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                                    <table className="w-full text-xs">
-                                      <thead className="bg-gray-100">
-                                        <tr>
-                                          <th className="py-1.5 px-2 text-left font-semibold text-gray-700">거래시간</th>
-                                          <th className="py-1.5 px-2 text-center font-semibold text-gray-700">물량</th>
-                                          <th className="py-1.5 px-2 text-right font-semibold text-gray-700">가격</th>
-                                          <th className="py-1.5 px-2 text-right font-semibold text-gray-700">개당</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-gray-100">
-                                        {[
-                                          { time: '5초 전', quantity: 2, price: 25000000, unit: 12500000 },
-                                          { time: '1분 전', quantity: 5, price: 63000000, unit: 12600000 },
-                                          { time: '3분 전', quantity: 10, price: 127000000, unit: 12700000 },
-                                          { time: '8분 전', quantity: 3, price: 38400000, unit: 12800000 },
-                                          { time: '15분 전', quantity: 7, price: 90300000, unit: 12900000 },
-                                          { time: '30분 전', quantity: 4, price: 52000000, unit: 13000000 },
-                                          { time: '1시간 전', quantity: 12, price: 157200000, unit: 13100000 },
-                                          { time: '2시간 전', quantity: 8, price: 105600000, unit: 13200000 },
-                                          { time: '4시간 전', quantity: 15, price: 199500000, unit: 13300000 },
-                                          { time: '6시간 전', quantity: 6, price: 80400000, unit: 13400000 },
-                                        ].map((trade, idx) => (
-                                          <tr key={idx} className="hover:bg-green-50 transition-colors">
-                                            <td className="py-1.5 px-2 text-gray-600">{trade.time}</td>
-                                            <td className="py-1.5 px-2 text-center font-medium text-gray-800">{trade.quantity}개</td>
-                                            <td className="py-1.5 px-2 text-right font-semibold text-gray-800">{trade.price.toLocaleString()}</td>
-                                            <td className="py-1.5 px-2 text-right text-green-600 font-semibold">{trade.unit.toLocaleString()}</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-
-              {/* 빈 행들 */}
-              {[...Array(3)].map((_, i) => (
-                <tr key={`empty-${i}`} className="border-b border-gray-100">
-                  <td className="py-3 px-4 text-gray-400 text-sm">-</td>
-                  <td className="py-3 px-4 text-gray-400 text-sm">-</td>
-                  <td className="py-3 px-4 text-center text-gray-400 text-sm">-</td>
-                  <td className="py-3 px-4 text-center text-gray-400 text-sm">-</td>
-                  <td className="py-3 px-4 text-center text-gray-400 text-sm">-</td>
-                  <td className="py-3 px-4 text-center text-gray-400 text-sm">-</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          {trackedItems.length === 0 ? (
+            <AuctionTableSkeleton rows={3} showDetailsColumn={false} />
+          ) : (
+            <AuctionTableWithAccordion
+              trackedItems={trackedItems}
+              chartData={chartData}
+              auctionItems={auctionItems}
+              soldHistory={soldHistory}
+              expandedItem={expandedItem}
+              onExpandItem={handleExpandItem}
+              chartInterval={chartInterval}
+              onChartIntervalChange={(itemId, interval) => setChartInterval(prev => ({ ...prev, [itemId]: interval }))}
+              chartRefs={chartRefs}
+              getChartDataForDisplay={getChartDataForDisplay}
+              getPriceYAxisDomain={getPriceYAxisDomain}
+              getItemCountYAxisDomain={getItemCountYAxisDomain}
+              getSoldCountYAxisDomain={getSoldCountYAxisDomain}
+              formatPrice={formatPrice}
+              formatChartPrice={formatChartPrice}
+              getTimeAgo={getTimeAgo}
+              enableAccordion={true}
+            />
+          )}
         </div>
       </div>
 
-      {/* 푸터 */}
       <Footer />
     </div>
   );

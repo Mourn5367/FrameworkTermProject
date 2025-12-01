@@ -56,6 +56,7 @@ public class AuctionController {
         TrackedItem item = TrackedItem.builder()
                 .itemId(request.getItemId())
                 .itemName(request.getItemName())
+                .itemImageUrl(request.getItemImageUrl())
                 .build();
 
         return ResponseEntity.ok(trackedItemRepo.save(item));
@@ -106,11 +107,11 @@ public class AuctionController {
                 .minPrices(snapshots.stream()
                         .map(PriceSnapshot::getMinPrice)
                         .collect(Collectors.toList()))
-                .maxPrices(snapshots.stream()
-                        .map(PriceSnapshot::getMaxPrice)
-                        .collect(Collectors.toList()))
                 .soldAvgPrices(snapshots.stream()
                         .map(PriceSnapshot::getSoldAvgPrice)
+                        .collect(Collectors.toList()))
+                .soldMaxPrices(snapshots.stream()
+                        .map(PriceSnapshot::getSoldMaxPrice)
                         .collect(Collectors.toList()))
                 .soldCounts(snapshots.stream()
                         .map(PriceSnapshot::getSoldCount)

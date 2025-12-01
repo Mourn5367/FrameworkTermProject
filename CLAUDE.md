@@ -1098,6 +1098,116 @@ DELETE /api/characters/{serverId}/{characterId}/cache
 - 예: `countByJobIdAndJobGrowId()` → `db.collection.count({jobId: ..., jobGrowId: ...})`
 - 복합 조건은 `And` 사용
 
+## 중요 트러블슈팅: URL 인코딩 문제 (2025.11.25)
+
+### 문제 상황
+관리자 페이지(`/admin`)에서 한글 아이템 검색 시 완전히 관련 없는 결과가 반환되는 문제 발생.
+- 검색어: "잔흔" → 결과: "Special E. S", "KOF 98 UM 무기" 등 무관한 아이템
+- 영어/숫자는 정상 작동
+
+### 원인 분석
+
+**1단계: 브라우저 → 백엔드**
+- 브라우저: `itemName=%EC%9E%94%ED%9D%94` (정상 URL 인코딩)
+- Spring Controller: `[잔흔]` (자동 디코딩 성공 ✅)
+
+**2단계: 백엔드 → 네오플 API (문제 발생)**
+```
+실제 전송된 URL: itemName=%25EC%259E%2594%25ED%259D%2594
+정상 URL:        itemName=%EC%9E%94%ED%9D%94
+```
+
+**이중 인코딩 발생:**
+- `%EC` → `%25EC` (% 기호가 %25로 재인코딩됨)
+- 네오플 API가 `%25EC%259E%2594%25ED%259D%2594`를 해석 → 잘못된 검색어
+
+### 시도한 해결 방법들 (실패)
+
+#### 1차 시도: `UriComponentsBuilder` 사용 ❌
+```java
+String url = UriComponentsBuilder.fromPath("/df/items")
+    .queryParam("itemName", itemName)
+    .queryParam("wordType", "full")
+    .build()
+    .encode()
+    .toUriString();
+
+webClient.get().uri(url)  // String을 전달하면 WebClient가 재인코딩!
+```
+**실패 이유:** WebClient가 String URL을 받으면 자동으로 재인코딩
+
+#### 2차 시도: `URLEncoder` 직접 사용 ❌
+```java
+String encodedName = URLEncoder.encode(itemName, "UTF-8");
+String url = String.format("/df/items?itemName=%s", encodedName);
+
+webClient.get().uri(url)  // 여전히 재인코딩됨
+```
+**실패 이유:** String 방식은 동일한 문제
+
+#### 3차 시도: `.replaceQuery()` 사용 ❌
+```java
+.uri(uriBuilder -> uriBuilder
+    .path("/df/items")
+    .replaceQuery(queryString)
+    .build())
+```
+**실패 이유:** `.replaceQuery()`도 재인코딩 발생
+
+### 최종 해결 방법 ✅
+
+**`URI.create()`로 완전한 URI 객체 직접 생성:**
+```java
+// AuctionApiService.java
+public ItemSearchResponse searchItems(String itemName) {
+    // 1. itemName을 UTF-8로 인코딩
+    String encodedName = java.net.URLEncoder.encode(itemName,
+                        java.nio.charset.StandardCharsets.UTF_8);
+
+    // 2. 완전한 URL 문자열 생성
+    String path = String.format("/df/items?wordType=full&limit=30&apikey=%s&itemName=%s",
+                    apiKey, encodedName);
+
+    // 3. URI 객체로 변환 (이미 인코딩되었음을 명시)
+    ItemSearchResponse response = webClient
+        .get()
+        .uri(java.net.URI.create("https://api.neople.co.kr" + path))
+        .retrieve()
+        .bodyToMono(ItemSearchResponse.class)
+        .block();
+}
+```
+
+**핵심 포인트:**
+- ✅ `URI.create()`: 이미 인코딩된 문자열을 URI 객체로 변환
+- ✅ WebClient가 URI 객체를 받으면 **재인코딩하지 않음**
+- ✅ 한 번만 인코딩: `잔흔` → `%EC%9E%94%ED%9D%94`
+
+### 검증
+**로그 확인:**
+```
+변경 전: itemName=%25EC%259E%2594%25ED%259D%2594 (이중 인코딩)
+변경 후: itemName=%EC%9E%94%ED%9D%94 (정상)
+```
+
+**테스트 결과:**
+- "잔흔" 검색 → "요기의 잔흔", "요기의 잔흔(1회 교환 가능)" 정상 표시 ✅
+- "형상화된 요기" 검색 → "형상화된 요기의 단서" 정상 표시 ✅
+
+### 교훈
+1. **WebClient URI 전달 방식이 중요**
+   - `String` → 자동 인코딩 (이중 인코딩 위험)
+   - `URI 객체` → 재인코딩하지 않음 (안전)
+
+2. **디버깅 팁**
+   - 로그에서 실제 HTTP 요청 URL 확인: `o.s.w.r.f.client.ExchangeFunctions`
+   - `%25`가 보이면 이중 인코딩 의심
+
+3. **Spring Boot + 한글 처리**
+   - `application.yml`의 `server.tomcat.uri-encoding: UTF-8` 필수
+   - Controller까지는 자동 디코딩됨
+   - 외부 API 호출 시 주의 필요
+
 ## 다음 단계
 
 1. ~~**던파 API 통합**: WebClient로 네오플 API 연동~~ ✅ 완료
@@ -1105,8 +1215,9 @@ DELETE /api/characters/{serverId}/{characterId}/cache
 3. ~~**병렬 처리 최적화**: 3단계 계층 구조 구현~~ ✅ 완료
 4. ~~**장비 통계 API**: 직업별 인기 장비 분석~~ ✅ 완료
 5. ~~**Swagger/OpenAPI**: API 문서 자동 생성~~ ✅ 완료
-6. **프론트엔드 통계 페이지**: 차트 라이브러리로 시각화
-7. **경매장 API**: 실시간 시세 조회 및 히스토리 추적
-8. **LLM 통합**: 크롤링 데이터 + 장비 정보 기반 빌드 추천
-9. **RAG 시스템**: 벡터 DB + 검색 시스템
-10. **스케줄러**: 자동 데이터 갱신 (일 1회)
+6. ~~**관리자 아이템 검색**: 한글 URL 인코딩 문제 해결~~ ✅ 완료
+7. **프론트엔드 통계 페이지**: 차트 라이브러리로 시각화
+8. **경매장 API**: 실시간 시세 조회 및 히스토리 추적
+9. **LLM 통합**: 크롤링 데이터 + 장비 정보 기반 빌드 추천
+10. **RAG 시스템**: 벡터 DB + 검색 시스템
+11. **스케줄러**: 자동 데이터 갱신 (일 1회)

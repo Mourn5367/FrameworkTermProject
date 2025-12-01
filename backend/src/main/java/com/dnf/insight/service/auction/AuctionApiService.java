@@ -109,23 +109,15 @@ public class AuctionApiService {
      */
     public ItemSearchResponse searchItems(String itemName) {
         try {
-            // UriComponentsBuilder로 쿼리 파라미터만 구성
-            String queryString = UriComponentsBuilder.newInstance()
-                    .queryParam("wordType", "full")
-                    .queryParam("limit", 30)
-                    .queryParam("apikey", apiKey)
-                    .queryParam("itemName", itemName)
-                    .build()
-                    .encode()
-                    .toUriString();
+            // 직접 URL 인코딩 (Spring이 재인코딩하지 않도록)
+            String encodedName = java.net.URLEncoder.encode(itemName, java.nio.charset.StandardCharsets.UTF_8);
+            String path = String.format("/df/items?wordType=full&limit=30&apikey=%s&itemName=%s",
+                    apiKey, encodedName);
 
-            // WebClient의 baseUrl과 결합 (재인코딩 방지)
+            // 이미 인코딩된 URI임을 명시
             ItemSearchResponse response = webClient
                     .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/df/items")
-                            .replaceQuery(queryString.substring(1))  // 맨 앞 '?' 제거
-                            .build())
+                    .uri(java.net.URI.create("https://api.neople.co.kr" + path))
                     .retrieve()
                     .bodyToMono(ItemSearchResponse.class)
                     .block();

@@ -46,7 +46,9 @@ function SearchResults() {
         setLoading(true);
         setError(null);
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const apiUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? `http://${window.location.hostname}:8080`
+          : 'http://localhost:8080';
         const response = await fetch(
           `${apiUrl}/api/characters/search?serverId=${server}&characterName=${encodeURIComponent(name)}`,
           { cache: 'no-store' }

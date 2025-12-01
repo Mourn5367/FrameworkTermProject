@@ -1,40 +1,90 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Footer from '@/components/layout/Footer';
 import SearchSection from '@/components/search/SearchSection';
-import ItemPriceTable, { PriceItem } from '@/components/item/ItemPriceTable';
 import NoticeSection, { Notice } from '@/components/notice/NoticeSection';
 import UpdateSection, { Update } from '@/components/notice/UpdateSection';
+import AuctionTableWithAccordion from '@/components/auction/AuctionTableWithAccordion';
+import AuctionTableSkeleton from '@/components/auction/AuctionTableSkeleton';
+
+const API_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? `http://${window.location.hostname}:8080`
+  : 'http://localhost:8080';
+
+interface TrackedItem {
+  id: number;
+  itemId: string;
+  itemName: string;
+  itemImageUrl: string;
+  addedAt: string;
+}
+
+interface ChartData {
+  itemId: string;
+  itemName: string;
+  labels: string[];
+  avgPrices: number[];
+  minPrices: number[];
+  soldAvgPrices: (number | null)[];
+  soldMaxPrices: (number | null)[];
+  soldCounts: number[];
+  itemCounts: number[];
+}
 
 export default function Home() {
   const router = useRouter();
+  const [trackedItems, setTrackedItems] = useState<TrackedItem[]>([]);
+  const [chartData, setChartData] = useState<{ [key: string]: ChartData }>({});
+  const [loading, setLoading] = useState(true);
 
   const handleSearch = (server: string, nickname: string) => {
     // 검색 페이지로 이동
     router.push(`/search?server=${encodeURIComponent(server)}&name=${encodeURIComponent(nickname)}`);
   };
 
-  // 아이템 시세 데이터
-  const priceItems: PriceItem[] = [
-    {
-      id: 1,
-      name: '전설의 검',
-      grade: '전설',
-      price: 10000,
-      change: 100,
-      changeDirection: 'up'
-    },
-    {
-      id: 2,
-      name: '빛나는 갑옷의 조각',
-      grade: '신화',
-      price: 900000,
-      change: 1000,
-      changeDirection: 'down'
-    }
-  ];
+  // 추적 아이템 목록 불러오기
+  useEffect(() => {
+    const loadTrackedItems = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/auction/tracked-items`);
+        const data = await res.json();
+        setTrackedItems(data);
+
+        // 모든 아이템의 차트 데이터 로드
+        if (data && data.length > 0) {
+          await loadAllChartData(data);
+        }
+      } catch (error) {
+        console.error('Failed to load tracked items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrackedItems();
+  }, []);
+
+  // 모든 아이템의 차트 데이터 로드
+  const loadAllChartData = async (items: TrackedItem[]) => {
+    const promises = items.map(async (item) => {
+      try {
+        const chartRes = await fetch(`${API_URL}/api/auction/items/${item.itemId}/chart?days=30`);
+        if (chartRes.ok) {
+          const data = await chartRes.json();
+          setChartData(prev => ({ ...prev, [item.itemId]: data }));
+        } else {
+          console.error(`Failed to fetch chart data for ${item.itemId}: ${chartRes.status}`);
+        }
+      } catch (error) {
+        console.error(`Failed to load chart data for ${item.itemId}:`, error);
+      }
+    });
+
+    await Promise.all(promises);
+  };
 
   // 공지사항 데이터
   const notices: Notice[] = [
@@ -99,8 +149,38 @@ export default function Home() {
           {/* 검색 섹션 */}
           <SearchSection onSearch={handleSearch} />
 
-          {/* 실시간 아이템 시세 테이블 */}
-          <ItemPriceTable items={priceItems} />
+          {/* 실시간 아이템 시세 */}
+          {loading ? (
+            <div className="mb-6">
+              <AuctionTableSkeleton rows={3} showDetailsColumn={true} />
+            </div>
+          ) : trackedItems.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md mb-6 p-8 text-center text-gray-500">
+              추적 중인 아이템이 없습니다
+            </div>
+          ) : (
+            <div className="mb-6">
+              <AuctionTableWithAccordion
+                trackedItems={trackedItems}
+                chartData={chartData}
+                auctionItems={{}}
+                soldHistory={{}}
+                expandedItem={null}
+                onExpandItem={() => {}}
+                chartInterval={{}}
+                onChartIntervalChange={() => {}}
+                chartRefs={{ current: {} }}
+                getChartDataForDisplay={() => []}
+                getPriceYAxisDomain={() => [0, 1]}
+                getItemCountYAxisDomain={() => [0, 1]}
+                getSoldCountYAxisDomain={() => [0, 1]}
+                formatPrice={(price) => price.toLocaleString() + '골드'}
+                formatChartPrice={(price) => price.toLocaleString()}
+                getTimeAgo={() => ''}
+                enableAccordion={false}
+              />
+            </div>
+          )}
 
           {/* 크롤링 데이터 위젯 */}
           <div className="bg-white rounded-xl shadow-md mb-6 p-6">

@@ -29,6 +29,14 @@ public interface AuctionSoldHistoryRepository extends JpaRepository<AuctionSoldH
     Double getAveragePriceSince(@Param("itemId") String itemId,
                                 @Param("since") LocalDateTime since);
 
+    // 아이템별 평균 판매가 (특정 기간 사이)
+    @Query("SELECT AVG(a.unitPrice) FROM AuctionSoldHistory a " +
+           "WHERE a.itemId = :itemId " +
+           "AND a.soldDate BETWEEN :startTime AND :endTime")
+    Double getAveragePriceBetween(@Param("itemId") String itemId,
+                                   @Param("startTime") LocalDateTime startTime,
+                                   @Param("endTime") LocalDateTime endTime);
+
     // 아이템별 최저 판매가 (특정 기간 이후)
     @Query("SELECT MIN(a.unitPrice) FROM AuctionSoldHistory a " +
            "WHERE a.itemId = :itemId " +
@@ -43,12 +51,28 @@ public interface AuctionSoldHistoryRepository extends JpaRepository<AuctionSoldH
     Long getMaxPriceSince(@Param("itemId") String itemId,
                           @Param("since") LocalDateTime since);
 
+    // 아이템별 최고 판매가 (특정 기간 사이)
+    @Query("SELECT MAX(a.unitPrice) FROM AuctionSoldHistory a " +
+           "WHERE a.itemId = :itemId " +
+           "AND a.soldDate BETWEEN :startTime AND :endTime")
+    Long getMaxPriceBetween(@Param("itemId") String itemId,
+                            @Param("startTime") LocalDateTime startTime,
+                            @Param("endTime") LocalDateTime endTime);
+
     // 아이템별 거래량 (특정 기간 이후)
     @Query("SELECT COUNT(a) FROM AuctionSoldHistory a " +
            "WHERE a.itemId = :itemId " +
            "AND a.soldDate >= :since")
     Long countSoldSince(@Param("itemId") String itemId,
                         @Param("since") LocalDateTime since);
+
+    // 아이템별 판매 개수 합계 (특정 기간 사이)
+    @Query("SELECT COALESCE(SUM(a.count), 0) FROM AuctionSoldHistory a " +
+           "WHERE a.itemId = :itemId " +
+           "AND a.soldDate BETWEEN :startTime AND :endTime")
+    Long sumSoldCountBetween(@Param("itemId") String itemId,
+                              @Param("startTime") LocalDateTime startTime,
+                              @Param("endTime") LocalDateTime endTime);
 
     // 인기 아이템 TOP 10 (거래량 기준)
     @Query("SELECT a.itemName, COUNT(a) as cnt FROM AuctionSoldHistory a " +

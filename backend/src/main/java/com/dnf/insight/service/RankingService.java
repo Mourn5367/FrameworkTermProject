@@ -31,6 +31,36 @@ public class RankingService {
     private final ObjectMapper objectMapper;
 
     /**
+     * jobs.json에서 모든 직업 정보 로드
+     */
+    public List<JobInfo> loadAllJobs() {
+        try {
+            ClassPathResource resource = new ClassPathResource("jobs.json");
+            JsonNode rootNode = objectMapper.readTree(resource.getInputStream());
+            List<JobInfo> allJobs = new ArrayList<>();
+
+            rootNode.fields().forEachRemaining(jobEntry -> {
+                String jobId = jobEntry.getKey();
+                String jobName = jobEntry.getValue().get("name").asText();
+                JsonNode growsNode = jobEntry.getValue().get("grows");
+
+                growsNode.fields().forEachRemaining(growEntry -> {
+                    String jobGrowId = growEntry.getKey();
+                    String jobGrowName = growEntry.getValue().asText();
+                    allJobs.add(new JobInfo(jobId, jobGrowId, jobName, jobGrowName));
+                });
+            });
+
+            log.info("✅ Loaded {} jobs from jobs.json", allJobs.size());
+            return allJobs;
+
+        } catch (IOException e) {
+            log.error("❌ Failed to load jobs.json", e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * 직업별 상위 100명 캐릭터 수집
      *
      * @param jobId 직업 ID
@@ -38,8 +68,7 @@ public class RankingService {
      * @param targetCount 목표 캐릭터 수 (기본: 100)
      * @return 수집된 캐릭터 목록
      */
-    public List<CharacterFameResponse.CharacterRow> collectT
-    opCharacters(
+    public List<CharacterFameResponse.CharacterRow> collectTopCharacters(
             String jobId, String jobGrowId, int targetCount) {
 
         log.info("🎯 Collecting top {} characters for jobGrowId={}", targetCount, jobGrowId);

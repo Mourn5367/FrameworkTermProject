@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class AddTrackedItemRequest {
 
-    private String itemId;      // 아이템 ID (필수)
-    private String itemName;    // 아이템명 (필수)
+    private String itemId;         // 아이템 ID (필수)
+    private String itemName;       // 아이템명 (필수)
+    private String itemImageUrl;   // 아이템 이미지 URL (선택)
 }

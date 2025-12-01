@@ -23,6 +23,9 @@ public class TrackedItem {
     @Column(nullable = false, length = 100)
     private String itemName;
 
+    @Column(length = 255)
+    private String itemImageUrl;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime addedAt;
 

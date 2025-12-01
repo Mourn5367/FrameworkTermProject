@@ -25,10 +25,10 @@ public class AuctionItem {
     @Column(unique = true, nullable = false)
     private Long auctionNo;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime regDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime expireDate;
 
     // 아이템 정보

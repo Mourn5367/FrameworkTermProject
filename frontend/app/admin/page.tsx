@@ -29,7 +29,9 @@ export default function AdminPage() {
   const [message, setMessage] = useState('');
 
   // API URL (클라이언트에서만 사용)
-  const API_URL = 'http://localhost:8080';
+  const API_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? `http://${window.location.hostname}:8080`
+    : 'http://localhost:8080';
 
   // 추적 아이템 목록 로드
   const loadTrackedItems = async () => {
@@ -93,6 +95,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           itemId: item.itemId,
           itemName: item.itemName,
+          itemImageUrl: `https://img-api.neople.co.kr/df/items/${item.itemId}`,
         }),
       });
 

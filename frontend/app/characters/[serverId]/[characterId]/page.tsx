@@ -52,7 +52,9 @@ export default function CharacterDetailPage({ params }: PageProps) {
         setLoading(true);
         setError(null);
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const apiUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? `http://${window.location.hostname}:8080`
+          : 'http://localhost:8080';
 
         // 캐릭터 기본 정보 조회
         const basicResponse = await fetch(

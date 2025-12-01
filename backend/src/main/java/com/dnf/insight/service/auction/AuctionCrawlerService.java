@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -41,9 +42,9 @@ public class AuctionCrawlerService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
-     * 2분마다 추적 중인 아이템 크롤링
+     * 1분 20초마다 추적 중인 아이템 크롤링
      */
-    @Scheduled(fixedDelay = 120000, initialDelay = 10000)
+    @Scheduled(fixedDelay = 80000, initialDelay = 10000)
     @Transactional
     public void crawlTrackedItems() {
         log.info("📊 경매장 크롤링 시작...");
@@ -76,8 +77,9 @@ public class AuctionCrawlerService {
                 // 판매 완료 내역 수집
                 collectSoldHistory(tracked);
 
-                // PriceSnapshot 생성
+                // PriceSnapshot 생성 및 과거 스냅샷 재계산
                 createPriceSnapshot(tracked);
+                recalculatePastSnapshots(tracked);
 
                 successCount++;
                 log.info("✅ 크롤링 완료: {} ({}건)", tracked.getItemName(), response.getRows().size());
@@ -89,6 +91,69 @@ public class AuctionCrawlerService {
         }
 
         log.info("📊 크롤링 완료: 성공={}, 실패={}", successCount, failCount);
+
+        // 크롤링 후 존재하지 않는 매물 정리 (병렬 처리)
+        cleanNonExistentItems();
+    }
+
+    /**
+     * DB에 저장된 매물이 실제로 존재하는지 병렬로 확인하고 삭제
+     * API로 조회해서 404면 판매 완료 or 등록 취소된 것으로 간주
+     */
+    @Transactional
+    public void cleanNonExistentItems() {
+        try {
+            List<AuctionItem> allItems = auctionItemRepo.findAll();
+
+            if (allItems.isEmpty()) {
+                log.debug("🧹 확인할 매물 없음");
+                return;
+            }
+
+            log.info("🔍 매물 존재 여부 확인 시작: {}건 (병렬 처리)", allItems.size());
+
+            // 병렬 처리: 모든 매물을 동시에 확인
+            List<CompletableFuture<AuctionItem>> futures = allItems.stream()
+                    .map(item -> CompletableFuture.supplyAsync(() -> {
+                        try {
+                            // 개별 매물 조회 (404면 null 반환)
+                            AuctionListResponse response = auctionApiService.getAuctionDetail(item.getAuctionNo());
+
+                            if (response == null) {
+                                // 매물이 존재하지 않음 (판매 완료 or 등록 취소)
+                                log.info("🗑️ 매물 삭제 대상: auctionNo={}, itemName={}",
+                                        item.getAuctionNo(), item.getItemName());
+                                return item;  // 삭제할 아이템 반환
+                            }
+                            return null;  // 존재하는 매물
+
+                        } catch (Exception e) {
+                            log.error("❌ 매물 확인 실패: auctionNo={}", item.getAuctionNo(), e);
+                            return null;
+                        }
+                    }))
+                    .collect(Collectors.toList());
+
+            // 모든 비동기 작업 완료 대기
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            // 삭제할 매물 수집
+            List<AuctionItem> itemsToDelete = futures.stream()
+                    .map(CompletableFuture::join)
+                    .filter(item -> item != null)
+                    .collect(Collectors.toList());
+
+            // 일괄 삭제
+            if (!itemsToDelete.isEmpty()) {
+                auctionItemRepo.deleteAll(itemsToDelete);
+                log.info("🧹 존재하지 않는 매물 정리 완료: {}건 삭제", itemsToDelete.size());
+            } else {
+                log.info("✅ 모든 매물이 정상적으로 존재함");
+            }
+
+        } catch (Exception e) {
+            log.error("❌ 매물 존재 여부 확인 실패", e);
+        }
     }
 
     /**
@@ -185,30 +250,31 @@ public class AuctionCrawlerService {
                 return;
             }
 
-            // 최근 24시간 판매 내역
-            LocalDateTime oneDayAgo = now.minusHours(24);
-            Double soldAvgPrice = soldHistoryRepo.getAveragePriceSince(itemId, oneDayAgo);
-            Long soldCount = soldHistoryRepo.countSoldSince(itemId, oneDayAgo);
+            // 최근 1분 20초간 판매 통계 (차트용)
+            LocalDateTime intervalAgo = now.minusSeconds(80);
+            Double soldAvgPrice = soldHistoryRepo.getAveragePriceBetween(itemId, intervalAgo, now);
+            Long soldMaxPrice = soldHistoryRepo.getMaxPriceBetween(itemId, intervalAgo, now);
+            Long soldCount = soldHistoryRepo.sumSoldCountBetween(itemId, intervalAgo, now);
 
-            // 통계 계산
+            // 현재 매물 통계 (unitPrice 기준)
             Long minPrice = items.stream()
                     .map(AuctionItem::getUnitPrice)
                     .filter(p -> p != null && p > 0)
                     .min(Long::compareTo)
                     .orElse(0L);
 
-            Long maxPrice = items.stream()
-                    .map(AuctionItem::getUnitPrice)
-                    .filter(p -> p != null && p > 0)
-                    .max(Long::compareTo)
-                    .orElse(0L);
+            // 가중 평균 계산 (개수를 고려한 평균 개당 가격)
+            long totalValue = items.stream()
+                    .filter(item -> item.getUnitPrice() != null && item.getUnitPrice() > 0)
+                    .mapToLong(item -> item.getUnitPrice() * item.getCount())
+                    .sum();
 
-            Double avgPrice = items.stream()
-                    .map(AuctionItem::getUnitPrice)
-                    .filter(p -> p != null && p > 0)
-                    .mapToLong(Long::longValue)
-                    .average()
-                    .orElse(0.0);
+            int totalCount = items.stream()
+                    .filter(item -> item.getUnitPrice() != null && item.getUnitPrice() > 0)
+                    .mapToInt(AuctionItem::getCount)
+                    .sum();
+
+            Double avgPrice = totalCount > 0 ? (double) totalValue / totalCount : 0.0;
 
             Integer itemCount = items.stream()
                     .mapToInt(AuctionItem::getCount)
@@ -221,8 +287,8 @@ public class AuctionCrawlerService {
             snapshot.setSnapshotTime(now);
             snapshot.setAvgPrice(avgPrice.longValue());
             snapshot.setMinPrice(minPrice);
-            snapshot.setMaxPrice(maxPrice);
             snapshot.setSoldAvgPrice(soldAvgPrice != null ? soldAvgPrice.longValue() : null);
+            snapshot.setSoldMaxPrice(soldMaxPrice);
             snapshot.setSoldCount(soldCount != null ? soldCount.intValue() : 0);
             snapshot.setItemCount(itemCount);
 
@@ -232,6 +298,72 @@ public class AuctionCrawlerService {
 
         } catch (Exception e) {
             log.error("❌ 스냅샷 생성 실패: {}", tracked.getItemName(), e);
+        }
+    }
+
+    /**
+     * 과거 10분치 스냅샷 재계산 (뒤늦게 수집된 판매 내역 반영)
+     */
+    private void recalculatePastSnapshots(TrackedItem tracked) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            String itemId = tracked.getItemId();
+
+            // 과거 10분치 스냅샷 조회
+            LocalDateTime tenMinutesAgo = now.minusMinutes(10);
+            List<PriceSnapshot> pastSnapshots = priceSnapshotRepo.findByItemIdAndSnapshotTimeBetween(
+                    itemId, tenMinutesAgo, now
+            );
+
+            if (pastSnapshots.isEmpty()) {
+                return;
+            }
+
+            int updatedCount = 0;
+            for (PriceSnapshot snapshot : pastSnapshots) {
+                LocalDateTime snapshotTime = snapshot.getSnapshotTime();
+                LocalDateTime intervalStart = snapshotTime.minusSeconds(80);
+
+                // 해당 시간대의 거래 통계 재계산 (BETWEEN으로 정확한 범위만)
+                Double soldAvgPrice = soldHistoryRepo.getAveragePriceBetween(itemId, intervalStart, snapshotTime);
+                Long soldMaxPrice = soldHistoryRepo.getMaxPriceBetween(itemId, intervalStart, snapshotTime);
+                Long soldCount = soldHistoryRepo.sumSoldCountBetween(itemId, intervalStart, snapshotTime);
+
+                // 변경 사항이 있으면 업데이트 (NULL 변경도 포함)
+                boolean changed = false;
+                Long newAvgPrice = soldAvgPrice != null ? soldAvgPrice.longValue() : null;
+                Integer newSoldCount = soldCount != null ? soldCount.intValue() : 0;
+
+                // soldAvgPrice 변경 체크 (NULL 포함)
+                if (!java.util.Objects.equals(newAvgPrice, snapshot.getSoldAvgPrice())) {
+                    snapshot.setSoldAvgPrice(newAvgPrice);
+                    changed = true;
+                }
+
+                // soldMaxPrice 변경 체크 (NULL 포함)
+                if (!java.util.Objects.equals(soldMaxPrice, snapshot.getSoldMaxPrice())) {
+                    snapshot.setSoldMaxPrice(soldMaxPrice);
+                    changed = true;
+                }
+
+                // soldCount 변경 체크
+                if (!newSoldCount.equals(snapshot.getSoldCount())) {
+                    snapshot.setSoldCount(newSoldCount);
+                    changed = true;
+                }
+
+                if (changed) {
+                    priceSnapshotRepo.save(snapshot);
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0) {
+                log.info("🔄 스냅샷 재계산: {} ({}건 업데이트)", tracked.getItemName(), updatedCount);
+            }
+
+        } catch (Exception e) {
+            log.error("❌ 스냅샷 재계산 실패: {}", tracked.getItemName(), e);
         }
     }
 

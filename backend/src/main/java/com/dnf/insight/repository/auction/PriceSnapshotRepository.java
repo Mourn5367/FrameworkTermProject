@@ -35,4 +35,14 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Lo
 
     // 특정 시간대의 모든 스냅샷
     List<PriceSnapshot> findBySnapshotTime(LocalDateTime snapshotTime);
+
+    // 특정 아이템의 특정 시간 스냅샷 조회
+    PriceSnapshot findByItemIdAndSnapshotTime(String itemId, LocalDateTime snapshotTime);
+
+    // 특정 아이템의 특정 기간 스냅샷 조회 (재계산용)
+    List<PriceSnapshot> findByItemIdAndSnapshotTimeBetween(
+            String itemId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 }

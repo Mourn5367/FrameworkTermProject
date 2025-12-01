@@ -22,7 +22,7 @@ public class AuctionSoldHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME")
     private LocalDateTime soldDate;
 
     // 아이템 정보
