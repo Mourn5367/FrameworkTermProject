@@ -94,4 +94,64 @@ public class EquipmentStatsController {
 
         return ResponseEntity.ok(stats);
     }
+
+    /**
+     * 직업명으로 장비 통계 검색
+     *
+     * @param jobName 직업명 (예: "웨폰마스터", "크루세이더")
+     * @return 장비 통계
+     */
+    @Operation(
+            summary = "직업명으로 장비 통계 검색",
+            description = "직업명(jobGrowName)으로 장비 통계를 검색합니다. 부분 일치도 가능합니다.\n\n" +
+                    "**예시:** \"웨폰마스터\", \"크루세이더\", \"버서커\""
+    )
+    @GetMapping("/equipment/search")
+    public ResponseEntity<JobEquipmentStats> searchEquipmentStatsByJobName(
+            @Parameter(description = "직업명", required = true, example = "웨폰마스터")
+            @RequestParam String jobName) {
+
+        log.info("🔍 Equipment stats search: jobName={}", jobName);
+
+        // 정확 매칭 먼저 시도
+        JobEquipmentStats stats = statsService.getJobEquipmentStatsByJobName(jobName);
+
+        if (stats == null) {
+            log.warn("⚠️ No stats found for jobName={}", jobName);
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * 장비 통계 캐시 갱신
+     *
+     * @param jobId 직업 ID
+     * @param jobGrowId 각성 직업 ID
+     * @return 갱신된 장비 통계
+     */
+    @Operation(
+            summary = "장비 통계 캐시 갱신",
+            description = "MongoDB에서 최신 데이터를 다시 계산하여 MySQL 캐시를 갱신합니다."
+    )
+    @PostMapping("/equipment/refresh")
+    public ResponseEntity<JobEquipmentStats> refreshEquipmentStats(
+            @Parameter(description = "직업 ID", required = true)
+            @RequestParam String jobId,
+
+            @Parameter(description = "각성 직업 ID", required = true)
+            @RequestParam String jobGrowId) {
+
+        log.info("🔄 Equipment stats refresh request: jobId={}, jobGrowId={}", jobId, jobGrowId);
+
+        JobEquipmentStats stats = statsService.calculateAndSave(jobId, jobGrowId);
+
+        if (stats == null) {
+            log.warn("⚠️ No equipment data found for jobId={}, jobGrowId={}", jobId, jobGrowId);
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(stats);
+    }
 }

@@ -12,13 +12,13 @@ async def lifespan(app: FastAPI):
     # 시작 시
     print("\n🚀 FastAPI 크롤러 서비스 시작\n")
     await connect_to_mongo()
-    start_scheduler()
+    start_scheduler()  # ⭐ 스케줄러 시작 (동기 함수)
 
     yield  # 애플리케이션 실행 중
 
     # 종료 시
     print("\n🛑 FastAPI 크롤러 서비스 종료\n")
-    stop_scheduler()
+    stop_scheduler()  # ⭐ 스케줄러 종료 (동기 함수)
     await close_mongo_connection()
 
 
@@ -32,7 +32,7 @@ app = FastAPI(
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8080"],  # Spring Boot, Next.js
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:8080"],  # Spring Boot, Next.js
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

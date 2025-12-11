@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 import SearchSection from '@/components/search/SearchSection';
 import CharacterInfoCard, { CharacterInfo } from '@/components/character/CharacterInfoCard';
 import EquipmentStatsSection from '@/components/character/EquipmentStatsSection';
+import { getServerNameKorean } from '@/utils/serverMapping';
 
 interface PageProps {
   params: Promise<{
@@ -29,21 +30,6 @@ export default function CharacterDetailPage({ params }: PageProps) {
 
   const handleSearch = (server: string, nickname: string) => {
     router.push(`/search?server=${encodeURIComponent(server)}&name=${encodeURIComponent(nickname)}`);
-  };
-
-  // 서버 ID를 한글명으로 변환
-  const getServerName = (serverId: string): string => {
-    const serverMap: { [key: string]: string } = {
-      'cain': '카인',
-      'diregie': '디레지에',
-      'siroco': '시로코',
-      'prey': '프레이',
-      'casillas': '카시야스',
-      'hilder': '힐더',
-      'anton': '안톤',
-      'bakal': '바칼'
-    };
-    return serverMap[serverId] || serverId;
   };
 
   useEffect(() => {
@@ -123,7 +109,7 @@ export default function CharacterDetailPage({ params }: PageProps) {
           level: basicData.level,
           fame: basicData.fame || 0,
           nickname: basicData.characterName,
-          server: getServerName(serverId),
+          server: getServerNameKorean(serverId),
           adventureName: basicData.adventureName || '-',
           guildName: basicData.guildName || '-',
           connectionTime: calculateMostActiveTime(playtimeData),

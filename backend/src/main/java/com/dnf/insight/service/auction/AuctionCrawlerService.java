@@ -42,9 +42,9 @@ public class AuctionCrawlerService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
-     * 1분 20초마다 추적 중인 아이템 크롤링
+     * 1분마다 추적 중인 아이템 크롤링
      */
-    @Scheduled(fixedDelay = 80000, initialDelay = 10000)
+    @Scheduled(fixedDelay = 60000, initialDelay = 10000)
     @Transactional
     public void crawlTrackedItems() {
         log.info("📊 경매장 크롤링 시작...");
@@ -250,8 +250,8 @@ public class AuctionCrawlerService {
                 return;
             }
 
-            // 최근 1분 20초간 판매 통계 (차트용)
-            LocalDateTime intervalAgo = now.minusSeconds(80);
+            // 최근 1분간 판매 통계 (차트용)
+            LocalDateTime intervalAgo = now.minusSeconds(60);
             Double soldAvgPrice = soldHistoryRepo.getAveragePriceBetween(itemId, intervalAgo, now);
             Long soldMaxPrice = soldHistoryRepo.getMaxPriceBetween(itemId, intervalAgo, now);
             Long soldCount = soldHistoryRepo.sumSoldCountBetween(itemId, intervalAgo, now);
@@ -322,7 +322,7 @@ public class AuctionCrawlerService {
             int updatedCount = 0;
             for (PriceSnapshot snapshot : pastSnapshots) {
                 LocalDateTime snapshotTime = snapshot.getSnapshotTime();
-                LocalDateTime intervalStart = snapshotTime.minusSeconds(80);
+                LocalDateTime intervalStart = snapshotTime.minusSeconds(60);
 
                 // 해당 시간대의 거래 통계 재계산 (BETWEEN으로 정확한 범위만)
                 Double soldAvgPrice = soldHistoryRepo.getAveragePriceBetween(itemId, intervalStart, snapshotTime);

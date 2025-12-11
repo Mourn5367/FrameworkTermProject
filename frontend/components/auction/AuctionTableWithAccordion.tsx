@@ -212,24 +212,24 @@ export default function AuctionTableWithAccordion({
                             <div className="flex gap-1 items-center">
                               <span className="text-xs text-gray-500 mr-2">간격:</span>
                               {[
-                                { label: '5분', value: 3 },
-                                { label: '10분', value: 5 },
-                                { label: '30분', value: 15 },
-                                { label: '1시간', value: 30 },
-                                { label: '6시간', value: 180 },
-                                { label: '12시간', value: 360 },
-                                { label: '1일', value: 720 },
-                                { label: '1주일', value: 5040 },
-                                { label: '1개월', value: 21600 },
-                                { label: '3개월', value: 64800 },
-                                { label: '6개월', value: 129600 },
-                                { label: '1년', value: 262800 },
+                                { label: '5분', value: 5 },
+                                { label: '10분', value: 10 },
+                                { label: '30분', value: 30 },
+                                { label: '1시간', value: 60 },
+                                { label: '6시간', value: 360 },
+                                { label: '12시간', value: 720 },
+                                { label: '1일', value: 1440 },
+                                { label: '1주일', value: 10080 },
+                                { label: '1개월', value: 43200 },
+                                { label: '3개월', value: 129600 },
+                                { label: '6개월', value: 259200 },
+                                { label: '1년', value: 525600 },
                               ].map((option) => (
                                 <button
                                   key={option.value}
                                   onClick={() => onChartIntervalChange(item.itemId, option.value)}
                                   className={`px-2 py-1 text-xs rounded transition-all ${
-                                    (chartInterval[item.itemId] || 3) === option.value
+                                    (chartInterval[item.itemId] || 5) === option.value
                                       ? 'bg-blue-600 text-white font-bold'
                                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                   }`}

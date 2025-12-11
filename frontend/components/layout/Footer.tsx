@@ -12,13 +12,20 @@ export default function Footer() {
           className="opacity-60"
         />
         <span className="text-gray-400">|</span>
-        <Image
-          src="/images/neople-logo.png"
-          alt="Powered by OpenAPI"
-          width={100}
-          height={24}
-          className="opacity-60"
-        />
+        <a
+          href="https://developers.neople.co.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:opacity-80 transition-opacity"
+        >
+          <Image
+            src="/images/neople-logo.png"
+            alt="Powered by OpenAPI"
+            width={191}
+            height={36}
+            className="opacity-60"
+          />
+        </a>
         <span className="text-gray-400">|</span>
         <a
           href="#"

@@ -26,6 +26,7 @@ class DCInsideSettings(CrawlerSettings):
     timeout_seconds: int = 10
     retry_count: int = 2
     gallery_id: str = "dfip"      # 갤러리 ID
+    fetch_full_content: bool = True  # 상세 페이지 크롤링 (본문 전체)
 
 
 @dataclass
@@ -50,37 +51,58 @@ class SchedulerSettings:
     concurrent_crawling: bool = False      # 동시 크롤링 (True) vs 순차 크롤링 (False)
 
 
+@dataclass
+class WordcloudSettings:
+    """워드클라우드 생성 설정"""
+    enabled: bool = True          # 워드클라우드 생성 활성화
+    hours_window: int = 1         # 최근 N시간 데이터 사용
+    width: int = 1200             # 이미지 너비
+    height: int = 600             # 이미지 높이
+    max_words: int = 100          # 최대 단어 수
+    colormap: str = "viridis"     # matplotlib colormap
+
+
 class CrawlerConfig:
     """크롤링 설정 통합 관리 클래스"""
 
     # 스케줄러 설정
     scheduler = SchedulerSettings(
         enabled=True,
-        interval_minutes=60,      # ⭐ 여기서 크롤링 주기 변경!
-        run_on_startup=True,
+        interval_minutes=5,       # ⭐ 5분마다 크롤링
+        run_on_startup=True,     # 시작 시 즉시 실행 안함 (5분 후 첫 실행)
         concurrent_crawling=False
     )
 
     # 디시인사이드 설정
     dcinside = DCInsideSettings(
         enabled=True,             # ⭐ 디시인사이드 활성화/비활성화
-        max_pages=3,              # ⭐ 크롤링할 페이지 수
-        rate_limit_seconds=5,     # ⭐ 페이지 간 대기 시간
+        max_pages=999,            # ⭐ 크롤링할 페이지 수 (제한 없음, 1시간 전까지만 수집)
+        rate_limit_seconds=3,     # ⭐ 페이지 간 대기 시간 (빠르게)
         timeout_seconds=10,
-        retry_count=2,
+        retry_count=4,
         gallery_id="dfip"         # ⭐ 갤러리 ID
     )
 
     # 아카라이브 설정
     arca = ArcaLiveSettings(
-        enabled=True,             # ⭐ 아카라이브 활성화/비활성화
-        max_pages=2,              # ⭐ 크롤링할 페이지 수
-        rate_limit_seconds=10,    # ⭐ 페이지 간 대기 시간
+        enabled=False,             # ⭐ 아카라이브 비활성화/비활성화
+        max_pages=999,            # ⭐ 크롤링할 페이지 수 (제한 없음, 1시간 전까지만 수집)
+        rate_limit_seconds=5,     # ⭐ 페이지 간 대기 시간
         timeout_seconds=20,
         retry_count=2,
         board_id="dunfa",         # ⭐ 게시판 ID
         headless=True,
         use_cloudflare_bypass=True
+    )
+
+    # 워드클라우드 설정
+    wordcloud = WordcloudSettings(
+        enabled=True,             # ⭐ 워드클라우드 생성 활성화/비활성화
+        hours_window=1,           # ⭐ 최근 1시간 데이터 사용
+        width=1200,
+        height=600,
+        max_words=100,
+        colormap="viridis"
     )
 
     @classmethod
@@ -118,6 +140,12 @@ class CrawlerConfig:
             f"   - 페이지 수: {cls.arca.max_pages}",
             f"   - 대기 시간: {cls.arca.rate_limit_seconds}초",
             f"   - Cloudflare 우회: {cls.arca.use_cloudflare_bypass}",
+            "",
+            "☁️  워드클라우드:",
+            f"   - 활성화: {cls.wordcloud.enabled}",
+            f"   - 시간 범위: 최근 {cls.wordcloud.hours_window}시간",
+            f"   - 이미지 크기: {cls.wordcloud.width}x{cls.wordcloud.height}",
+            f"   - 최대 단어 수: {cls.wordcloud.max_words}",
             "",
             "=" * 60,
         ]

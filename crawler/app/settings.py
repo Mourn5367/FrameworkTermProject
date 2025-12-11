@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     """애플리케이션 설정"""
 
     # MongoDB
-    mongodb_url: str = "mongodb://mongodb:27017"
-    mongodb_db_name: str = "dnf_insight"
+    mongodb_uri: str = "mongodb://admin:password123@mongodb:27017/dnf_insight?authSource=admin"
+    mongodb_database: str = "dnf_insight"
 
     # 크롤링 설정
     crawl_interval_minutes: int = 60

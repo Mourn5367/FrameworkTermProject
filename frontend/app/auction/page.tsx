@@ -70,23 +70,49 @@ export default function AuctionPage() {
       const data = chartData[itemId];
       if (!data) return;
 
-      const interval = chartInterval[itemId] || 3;
+      const intervalMinutes = chartInterval[itemId] || 5;
       const aggregatedData: any[] = [];
 
-      for (let i = 0; i < data.labels.length; i += interval) {
-        const endIdx = Math.min(i + interval, data.labels.length);
-        if (endIdx - i < interval && i > 0) break;
+      // 시간 기준으로 그룹핑 (정확한 시간 간격)
+      const grouped = new Map<number, {
+        labels: string[];
+        minPrices: (number | null)[];
+        soldAvgPrices: (number | null)[];
+        soldMaxPrices: (number | null)[];
+        itemCounts: (number | null)[];
+        soldCounts: (number | null)[];
+      }>();
 
-        const rangeData = {
-          labels: data.labels.slice(i, endIdx),
-          minPrices: data.minPrices.slice(i, endIdx),
-          soldAvgPrices: data.soldAvgPrices.slice(i, endIdx),
-          soldMaxPrices: data.soldMaxPrices.slice(i, endIdx),
-          itemCounts: data.itemCounts.slice(i, endIdx),
-          soldCounts: data.soldCounts.slice(i, endIdx),
-        };
+      for (let i = 0; i < data.labels.length; i++) {
+        const timestamp = new Date(data.labels[i]).getTime();
+        // intervalMinutes 단위로 그룹핑 (예: 5분이면 0, 5, 10, 15... 분에 해당하는 구간)
+        const bucketTime = Math.floor(timestamp / (intervalMinutes * 60 * 1000)) * (intervalMinutes * 60 * 1000);
 
-        const date = new Date(rangeData.labels[rangeData.labels.length - 1]);
+        if (!grouped.has(bucketTime)) {
+          grouped.set(bucketTime, {
+            labels: [],
+            minPrices: [],
+            soldAvgPrices: [],
+            soldMaxPrices: [],
+            itemCounts: [],
+            soldCounts: [],
+          });
+        }
+
+        const bucket = grouped.get(bucketTime)!;
+        bucket.labels.push(data.labels[i]);
+        bucket.minPrices.push(data.minPrices[i]);
+        bucket.soldAvgPrices.push(data.soldAvgPrices[i]);
+        bucket.soldMaxPrices.push(data.soldMaxPrices[i]);
+        bucket.itemCounts.push(data.itemCounts[i]);
+        bucket.soldCounts.push(data.soldCounts[i]);
+      }
+
+      // 시간순 정렬 후 집계
+      const sortedBuckets = Array.from(grouped.entries()).sort((a, b) => a[0] - b[0]);
+
+      for (const [bucketTime, rangeData] of sortedBuckets) {
+        const date = new Date(bucketTime);
         const validMinPrices = rangeData.minPrices.filter(p => p && p > 0);
         const validAvgPrices = rangeData.soldAvgPrices.filter(p => p && p > 0);
         const validMaxPrices = rangeData.soldMaxPrices.filter(p => p && p > 0);
@@ -98,9 +124,9 @@ export default function AuctionPage() {
           ? Math.round(validAvgPrices.reduce((a, b) => a + b, 0) / validAvgPrices.length)
           : null;
 
-        // 최고가: 평균가의 10배 이하인 정상 거래만 필터링
+        // 최고가: 평균가의 5배 이하인 정상 거래만 필터링
         const normalMaxPrices = avgPrice
-          ? validMaxPrices.filter(p => p <= avgPrice * 10)
+          ? validMaxPrices.filter(p => p <= avgPrice * 5)
           : validMaxPrices;
 
         // 원본 최고가 (이상치 포함)
@@ -122,7 +148,7 @@ export default function AuctionPage() {
           거래최고가_원본: maxPriceWithOutlier, // 툴팁용 (이상치 포함)
           거래최고가: maxPriceNormal, // 차트 선용 (이상치 제외)
           이상치표시: (maxPriceWithOutlier && maxPriceNormal && maxPriceWithOutlier !== maxPriceNormal) ? maxPriceNormal : null,
-          등록물량: Math.round(totalItemCount / interval),
+          등록물량: Math.round(totalItemCount / rangeData.labels.length), // 실제 데이터 개수로 나눔
           거래량: totalSoldCount,
         });
       }
@@ -151,8 +177,10 @@ export default function AuctionPage() {
       for (const [itemId, element] of Object.entries(chartRefs.current)) {
         if (element && element.contains(e.target as Node)) {
           // React 이벤트로 변환하여 handleChartWheel 호출
-          const intervals = [3, 5, 15, 30, 180, 360, 720, 5040, 21600, 64800, 129600, 262800]; // 5분, 10분, 30분, 1시간, 6시간, 12시간, 1일, 1주일, 1개월, 3개월, 6개월, 1년
-          const currentInterval = chartInterval[itemId] || 3;
+          // 간격(interval): 1분 크롤링 기준
+          // 5분(5), 10분(10), 30분(30), 1시간(60), 6시간(360), 12시간(720), 1일(1440), 1주일(10080), 1개월(43200), 3개월(129600), 6개월(259200), 1년(525600)
+          const intervals = [5, 10, 30, 60, 360, 720, 1440, 10080, 43200, 129600, 259200, 525600];
+          const currentInterval = chartInterval[itemId] || 5;
           const currentIndex = intervals.indexOf(currentInterval);
 
           let newIndex;

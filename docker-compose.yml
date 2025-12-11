@@ -120,6 +120,58 @@ services:
       - /app/node_modules
       - /app/.next
 
+  crawler:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    container_name: dnf-crawler
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      TZ: Asia/Seoul
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/dnf_insight?authSource=admin
+      MONGODB_DATABASE: dnf_insight
+      OLLAMA_API_URL: http://ollama:11434
+      SPRING_BACKEND_URL: http://backend:8080
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - dnf-network
+    volumes:
+      - chroma_data:/app/chroma_db  # ChromaDB Vector DB 영구 저장
+    # volumes 제거: 자동 크롤링 활성화 (lifespan 정상 작동)
+    # volumes:
+    #   - ./crawler:/app
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: dnf-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - dnf-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 networks:
   dnf-network:
     driver: bridge
@@ -130,4 +182,8 @@ volumes:
   redis_data:
     driver: local
   mysql_data:
+    driver: local
+  ollama_data:
+    driver: local
+  chroma_data:
     driver: local

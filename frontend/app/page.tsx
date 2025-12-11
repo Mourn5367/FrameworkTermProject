@@ -9,6 +9,7 @@ import NoticeSection, { Notice } from '@/components/notice/NoticeSection';
 import UpdateSection, { Update } from '@/components/notice/UpdateSection';
 import AuctionTableWithAccordion from '@/components/auction/AuctionTableWithAccordion';
 import AuctionTableSkeleton from '@/components/auction/AuctionTableSkeleton';
+import WordCloudWidget from '@/components/wordcloud/WordCloudWidget';
 
 const API_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
   ? `http://${window.location.hostname}:8080`
@@ -141,8 +142,9 @@ export default function Home() {
               alt="DunSight"
               width={300}
               height={80}
-              className="mx-auto"
+              className="mx-auto cursor-pointer hover:opacity-80 transition-opacity"
               priority
+              onClick={() => router.push('/')}
             />
           </div>
 
@@ -182,25 +184,8 @@ export default function Home() {
             </div>
           )}
 
-          {/* 크롤링 데이터 위젯 */}
-          <div className="bg-white rounded-xl shadow-md mb-6 p-6">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-800">크롤링 데이터 위젯</h3>
-                <p className="text-sm text-gray-500">공지사항 전</p>
-              </div>
-            </div>
-            <p className="text-center text-gray-600 text-sm">
-              실시간 크롤링으로 데이터를 수집하여 통계를 작업합니다.
-              <br />
-              최신 업데이트 날짜 및 매물 정보를 지속적으로 업데이트합니다.
-            </p>
-          </div>
+          {/* 워드클라우드 위젯 */}
+          <WordCloudWidget />
 
           {/* 공지사항 섹션 */}
           <NoticeSection notices={notices} />

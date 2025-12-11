@@ -39,5 +39,8 @@ COPY . .
 # 포트 노출
 EXPOSE 8000
 
-# 실행 명령
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 환경 변수: Python 버퍼링 비활성화
+ENV PYTHONUNBUFFERED=1
+
+# 실행 명령 (reload 제거 - 스케줄러 작업이 취소되는 문제 방지)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

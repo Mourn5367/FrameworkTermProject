@@ -27,11 +27,13 @@ public class RankingService {
 
     private final DnfApiClient dnfApiClient;
     private final EquipmentService equipmentService;
+    private final EquipmentStatsService equipmentStatsService;
     private final com.dnf.insight.repository.CharacterEquipmentRepository equipmentRepository;
     private final ObjectMapper objectMapper;
 
     /**
      * jobs.json에서 모든 직업 정보 로드
+     * 구조: { rows: [ { jobId, jobName, rows: [ { jobGrowId, jobGrowName, next: {...} } ] } ] }
      */
     public List<JobInfo> loadAllJobs() {
         try {
@@ -39,17 +41,21 @@ public class RankingService {
             JsonNode rootNode = objectMapper.readTree(resource.getInputStream());
             List<JobInfo> allJobs = new ArrayList<>();
 
-            rootNode.fields().forEachRemaining(jobEntry -> {
-                String jobId = jobEntry.getKey();
-                String jobName = jobEntry.getValue().get("name").asText();
-                JsonNode growsNode = jobEntry.getValue().get("grows");
+            JsonNode rowsNode = rootNode.get("rows");
+            if (rowsNode != null && rowsNode.isArray()) {
+                for (JsonNode jobNode : rowsNode) {
+                    String jobId = jobNode.get("jobId").asText();
+                    String jobName = jobNode.get("jobName").asText();
 
-                growsNode.fields().forEachRemaining(growEntry -> {
-                    String jobGrowId = growEntry.getKey();
-                    String jobGrowName = growEntry.getValue().asText();
-                    allJobs.add(new JobInfo(jobId, jobGrowId, jobName, jobGrowName));
-                });
-            });
+                    JsonNode jobGrowsNode = jobNode.get("rows");
+                    if (jobGrowsNode != null && jobGrowsNode.isArray()) {
+                        for (JsonNode growNode : jobGrowsNode) {
+                            // 재귀적으로 모든 각성 단계 수집
+                            collectJobGrows(allJobs, jobId, jobName, growNode);
+                        }
+                    }
+                }
+            }
 
             log.info("✅ Loaded {} jobs from jobs.json", allJobs.size());
             return allJobs;
@@ -57,6 +63,25 @@ public class RankingService {
         } catch (IOException e) {
             log.error("❌ Failed to load jobs.json", e);
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 재귀적으로 모든 각성 단계 수집
+     */
+    private void collectJobGrows(List<JobInfo> allJobs, String jobId, String jobName, JsonNode growNode) {
+        String jobGrowId = growNode.get("jobGrowId").asText();
+        String jobGrowName = growNode.get("jobGrowName").asText();
+
+        // 眞 각성만 수집 (최종 각성 단계)
+        if (jobGrowName.contains("眞")) {
+            allJobs.add(new JobInfo(jobId, jobGrowId, jobName, jobGrowName));
+        }
+
+        // next가 있으면 재귀 호출
+        JsonNode nextNode = growNode.get("next");
+        if (nextNode != null) {
+            collectJobGrows(allJobs, jobId, jobName, nextNode);
         }
     }
 
@@ -226,6 +251,18 @@ public class RankingService {
         }
 
         log.info("✅ Parallel collection complete: {} success, {} failed", successCount, failCount);
+
+        // ===== 장비 통계 MySQL 캐시 자동 생성 =====
+        if (successCount > 0) {
+            log.info("💾 Auto-saving equipment stats to MySQL for {} {}", jobName, jobGrowName);
+            try {
+                equipmentStatsService.calculateAndSave(jobId, jobGrowId);
+                log.info("✅ Equipment stats saved successfully");
+            } catch (Exception e) {
+                log.error("❌ Failed to save equipment stats: {}", e.getMessage());
+                // 통계 저장 실패해도 크롤링은 성공한 것으로 간주
+            }
+        }
 
         log.info("🎉 Collection complete for {}: success={}, fail={}", jobGrowName, successCount, failCount);
         return new CollectionResult(successCount, failCount);

@@ -17,4 +17,14 @@ playwright==1.41.0  # Playwright 아카라이브 크롤러용 (Windows 안정)
 konlpy==0.6.0  # 한글 형태소 분석
 wordcloud==1.9.3  # 워드클라우드 생성
 matplotlib==3.8.2  # 시각화
+Pillow==10.1.0  # 이미지 처리 (wordcloud 의존성)
+JPype1==1.5.0  # KoNLPy Java 바인딩
 pandas==2.1.4  # 데이터 분석 (선택)
+
+# RAG Vector DB 시스템
+chromadb==0.4.22  # Vector DB (현업 표준)
+sentence-transformers==2.3.1  # 임베딩 모델 (jhgan/ko-sroberta-multitask)
+torch==2.1.2  # PyTorch (sentence-transformers 의존성)
+torchvision==0.16.2  # torchvision (선택, torch와 버전 맞춤)
+torchaudio==2.1.2  # torchaudio (선택)
+numpy<2.0.0  # ChromaDB 호환성

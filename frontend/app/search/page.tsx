@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import SearchSection from '@/components/search/SearchSection';
 import Footer from '@/components/layout/Footer';
+import { getServerNameKorean } from '@/utils/serverMapping';
 
 interface Character {
   serverId: string;
@@ -90,14 +91,17 @@ function SearchResults() {
     );
   }
 
-  if (error) {
+  // 에러는 모달로 처리되므로 에러 화면 제거
+  if (error || characters.length === 0) {
+    // 검색 결과가 없거나 에러인 경우 메인으로 리다이렉트 (모달로 이미 처리됨)
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-4">검색 결과를 찾을 수 없습니다.</p>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90"
+            className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-all"
+            style={{ background: 'var(--primary)' }}
           >
             메인으로 돌아가기
           </button>
@@ -142,21 +146,28 @@ function SearchResults() {
               >
                 <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary">
                   {/* 캐릭터 이미지 */}
-                  <div className="relative w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600">
+                  <div
+                    className="relative w-full h-48"
+                    style={{
+                      backgroundImage: 'url(https://bbscdn.df.nexon.com/data7/showroom/static/img/bg3.jpg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
                     <img
                       src={`https://img-api.neople.co.kr/df/servers/${character.serverId}/characters/${character.characterId}?zoom=1`}
                       alt={character.characterName}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain relative z-10"
                     />
-                    <div className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {character.serverId}
-                    </div>
                   </div>
 
                   {/* 카드 정보 */}
                   <div className="p-4">
-                    {/* 캐릭터 이름 */}
+                    {/* 서버명 + 캐릭터 이름 */}
                     <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">
+                        {getServerNameKorean(character.serverId)}
+                      </p>
                       <h3 className="text-lg font-bold text-gray-800">
                         {character.characterName}
                       </h3>

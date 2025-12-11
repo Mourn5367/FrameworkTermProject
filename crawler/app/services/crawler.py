@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import List
 from app.models.post import CommunityPost
-from app.config import get_settings
+from app.settings import get_settings
 
 settings = get_settings()
 

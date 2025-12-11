@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableJpaRepositories(basePackages = "com.dnf.insight.repository.auction")
+@EnableJpaRepositories(basePackages = "com.dnf.insight.repository")
 @EnableMongoRepositories(basePackages = "com.dnf.insight.repository")
 public class DnfInsightApplication {
 
