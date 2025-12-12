@@ -2,7 +2,16 @@
  * 장비 통계 API 호출 함수
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// 동적으로 API URL 생성 (브라우저의 현재 호스트 기준)
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    return hostname !== 'localhost'
+      ? `http://${hostname}:8080`
+      : 'http://localhost:8080';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+};
 
 export interface ItemStat {
   itemId: string;
@@ -82,6 +91,7 @@ export async function getEquipmentStats(
   jobId: string,
   jobGrowId: string
 ): Promise<JobEquipmentStats> {
+  const API_BASE_URL = getApiBaseUrl();
   const url = `${API_BASE_URL}/api/stats/equipment?jobId=${jobId}&jobGrowId=${jobGrowId}`;
 
   const response = await fetch(url, {

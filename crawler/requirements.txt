@@ -9,6 +9,7 @@ python-dotenv==1.0.0
 lxml==5.1.0
 httpx==0.26.0  # Async HTTP client
 pydantic-settings==2.1.0  # Pydantic settings management
+redis==5.0.1  # Redis client (asyncio 지원)
 selenium==4.16.0  # 디시인사이드 크롤링 (폴백용)
 webdriver-manager==4.0.1  # ChromeDriver 자동 관리 (폴백용)
 nodriver==0.37  # 2025년 최신 Cloudflare 우회 (아카라이브용)
@@ -22,9 +23,11 @@ JPype1==1.5.0  # KoNLPy Java 바인딩
 pandas==2.1.4  # 데이터 분석 (선택)
 
 # RAG Vector DB 시스템
-chromadb==0.4.22  # Vector DB (현업 표준)
+chromadb==0.4.22  # Vector DB
 sentence-transformers==2.3.1  # 임베딩 모델 (jhgan/ko-sroberta-multitask)
 torch==2.1.2  # PyTorch (sentence-transformers 의존성)
+transformers==4.36.2  # Transformers (torch 2.1.2 호환 버전)
 torchvision==0.16.2  # torchvision (선택, torch와 버전 맞춤)
 torchaudio==2.1.2  # torchaudio (선택)
 numpy<2.0.0  # ChromaDB 호환성
+aiomysql==0.2.0  # Async MySQL client

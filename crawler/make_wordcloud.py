@@ -140,7 +140,7 @@ async def make_wordcloud():
         from wordcloud import WordCloud
         import matplotlib.pyplot as plt
 
-        # 한글 폰트 경로 (시스템마다 다름)
+        # 한글 폰트 경로
         font_paths = [
             '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',  # Linux
             'C:/Windows/Fonts/malgun.ttf',  # Windows

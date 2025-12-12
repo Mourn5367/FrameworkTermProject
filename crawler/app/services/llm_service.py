@@ -23,12 +23,18 @@ class LLMService:
         self.timeout = httpx.Timeout(120.0, connect=10.0)  # LLM 응답 대기 시간 길게
         self.max_iterations = 5  # Function Calling 최대 반복 횟수
 
-    async def query(self, user_question: str) -> Dict[str, Any]:
+    async def query(
+        self,
+        user_question: str,
+        chat_history: Optional[List[Dict[str, str]]] = None
+    ) -> Dict[str, Any]:
         """
         사용자 질문에 대한 RAG 응답 생성
 
         Args:
             user_question: 사용자 질문
+            chat_history: 채팅 히스토리 (선택 사항)
+                [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}, ...]
 
         Returns:
             LLM 응답 및 사용된 도구 정보
@@ -39,25 +45,34 @@ class LLMService:
                 "content": """당신은 던파(던전앤파이터) 전문 AI 어시스턴트입니다.
 
 사용 가능한 도구:
-1. get_equipment_stats: 직업별 장비 통계 조회 (상위 100명 기준)
-2. get_auction_price: 경매장 아이템 시세 조회 (30일 추이, 요일/시간 패턴 포함)
-3. search_character: 캐릭터 검색 및 정보 조회
+- search_community_posts: 커뮤니티에서 크롤링한 게시글 검색 (공략, 빌드, 팁, 이벤트 정보 등)
 
-사용자 질문을 분석하여 적절한 도구를 선택하고, 도구 실행 결과를 바탕으로 자연스러운 답변을 생성하세요.
+사용자 질문을 분석하여 search_community_posts 도구를 사용해 관련 게시글을 찾고, 그 내용을 바탕으로 답변하세요.
 
 중요:
-- 빌드/장비 관련 질문 → get_equipment_stats 사용
-- 경매장/시세/구매 타이밍 질문 → get_auction_price 사용 (요일/시간 패턴 활용)
-- 캐릭터 정보 질문 → search_character 사용
-- 답변은 한국어로, 친절하고 자세하게 작성
-- 통계 데이터는 구체적인 수치와 함께 설명
+- 던전 공략, 직업 빌드, 게임 팁 등 모든 질문에 search_community_posts 사용
+- 검색된 게시글의 내용을 요약해서 답변
+- 답변 마지막에 반드시 출처 URL을 표기 (예: "출처: https://...")
+- 답변은 반드시 한국어로, 친절하고 자세하게 작성
+- 검색 결과가 없으면 "관련 정보를 찾을 수 없습니다"라고 안내
 """
-            },
-            {
-                "role": "user",
-                "content": user_question
             }
         ]
+
+        # 채팅 히스토리가 있으면 추가 (최근 10개만)
+        if chat_history:
+            recent_history = chat_history[-10:]
+            for msg in recent_history:
+                messages.append({
+                    "role": msg.get("role"),
+                    "content": msg.get("content")
+                })
+
+        # 현재 사용자 질문 추가
+        messages.append({
+            "role": "user",
+            "content": user_question
+        })
 
         iteration = 0
         tool_calls_history = []
@@ -132,7 +147,11 @@ class LLMService:
                         "model": self.model,
                         "messages": messages,
                         "tools": TOOLS_DEFINITION,
-                        "stream": False
+                        "stream": False,
+                        "options": {
+                            "num_predict": 100000,  # 최대 생성 토큰 수
+                            "temperature": 0.3,   # 창의성 (0.0~1.0)
+                        }
                     }
                 )
 
@@ -175,23 +194,10 @@ class LLMService:
             함수 실행 결과
         """
         try:
-            if function_name == "get_equipment_stats":
-                return await self.tools.get_equipment_stats(
-                    job_name=arguments.get("job_name", "")
-                )
-            elif function_name == "get_auction_price":
-                return await self.tools.get_auction_price(
-                    item_name=arguments.get("item_name", "")
-                )
-            elif function_name == "search_character":
-                return await self.tools.search_character(
-                    server=arguments.get("server", ""),
-                    character_name=arguments.get("character_name", "")
-                )
-            elif function_name == "search_community_posts":
+            if function_name == "search_community_posts":
                 return self.tools.search_community_posts(
                     query=arguments.get("query", ""),
-                    top_k=arguments.get("top_k", 3)
+                    top_k=arguments.get("top_k", 5)
                 )
             else:
                 return {
@@ -199,6 +205,8 @@ class LLMService:
                     "error": f"알 수 없는 함수: {function_name}"
                 }
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return {
                 "success": False,
                 "error": f"도구 실행 실패: {str(e)}"

@@ -28,7 +28,7 @@ ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
 # Python 의존성 복사 및 설치
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
+#RUN pip install -r requirements.txt
 # Playwright 브라우저 설치
 RUN playwright install chromium
 RUN playwright install-deps chromium || true
@@ -44,3 +44,4 @@ ENV PYTHONUNBUFFERED=1
 
 # 실행 명령 (reload 제거 - 스케줄러 작업이 취소되는 문제 방지)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+

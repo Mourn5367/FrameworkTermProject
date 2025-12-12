@@ -61,32 +61,47 @@ async def crawl_job():
 
         # 병렬 실행
         print("\n🚀 병렬 크롤링 시작...\n")
-        dc_posts, arca_posts = await asyncio.gather(
-            crawl_dcinside(),
-            crawl_arca()
-        )
 
-        all_posts = dc_posts + arca_posts
+        # 아카라이브 활성화 여부에 따라 분기
+        if crawler_config.arca.enabled:
+            dc_posts, arca_posts = await asyncio.gather(
+                crawl_dcinside(),
+                crawl_arca()
+            )
+            all_posts = dc_posts + arca_posts
+        else:
+            dc_posts = await crawl_dcinside()
+            arca_posts = []
+            all_posts = dc_posts
 
         if not all_posts:
             print("⚠️  크롤링된 게시글이 없습니다.")
             return
 
         # MongoDB에 저장
+        print(f"\n💾 MongoDB 저장 시작... (총 {len(all_posts)}개)")
         db = get_database()
         collection = db["community_posts"]
 
         saved_count = 0
-        for post in all_posts:
-            result = await collection.update_one(
-                {"url": post.url},
-                {"$set": post.model_dump()},
-                upsert=True
-            )
-            if result.upserted_id or result.modified_count > 0:
-                saved_count += 1
+        for idx, post in enumerate(all_posts):
+            try:
+                result = await collection.update_one(
+                    {"url": post.url},
+                    {"$set": post.model_dump()},
+                    upsert=True
+                )
+                if result.upserted_id or result.modified_count > 0:
+                    saved_count += 1
 
-        print(f"\n💾 MongoDB 저장 완료: {saved_count}개 (총 {len(all_posts)}개)")
+                # 진행상황 표시
+                if (idx + 1) % 50 == 0 or (idx + 1) == len(all_posts):
+                    print(f"   📊 MongoDB 저장 진행: {idx + 1}/{len(all_posts)}")
+            except Exception as e:
+                print(f"   ❌ MongoDB 저장 실패: {post.url[:50]}... - {e}")
+                continue
+
+        print(f"✅ MongoDB 저장 완료: {saved_count}개 (총 {len(all_posts)}개)")
 
         # 3. 워드클라우드 생성 (세션 ID 기반으로 3개 생성)
         if crawler_config.wordcloud.enabled:
@@ -110,7 +125,7 @@ async def crawl_job():
                 else:
                     print("❌ 생성 실패 (데이터 없음)\n")
 
-            # 3-2. 아카라이브 던파 채널 워드클라우드
+            #3-2. 아카라이브 던파 채널 워드클라우드
             if crawler_config.arca.enabled and arca_posts:
                 print("[2/3] 아카라이브 던파 채널 워드클라우드...")
                 arca_wc = await wc_service.generate_wordcloud_by_session(

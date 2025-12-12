@@ -249,6 +249,12 @@ class DCInsideCrawler:
                     tzinfo=self.kst
                 )
 
+            # "12.09" 또는 "12/09" 형태 (월.일, 올해)
+            elif ("." in date_str or "/" in date_str) and len(date_str.split("." if "." in date_str else "/")) == 2:
+                parts = date_str.replace("/", ".").split(".")
+                month, day = parts
+                return datetime(now_kst.year, int(month), int(day), tzinfo=self.kst)
+
             else:
                 return now_kst
 

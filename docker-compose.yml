@@ -132,17 +132,28 @@ services:
       TZ: Asia/Seoul
       MONGODB_URI: mongodb://admin:password123@mongodb:27017/dnf_insight?authSource=admin
       MONGODB_DATABASE: dnf_insight
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       OLLAMA_API_URL: http://ollama:11434
       SPRING_BACKEND_URL: http://backend:8080
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: dnf_auction
+      MYSQL_USER: dnf
+      MYSQL_PASSWORD: password123
     depends_on:
       mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
       ollama:
         condition: service_started
     networks:
       - dnf-network
     volumes:
-      - chroma_data:/app/chroma_db  # ChromaDB Vector DB 영구 저장
+      - ./crawler/chroma_data:/app/chroma_db  # ChromaDB Vector DB 영구 저장 (WSL 경로)
     # volumes 제거: 자동 크롤링 활성화 (lifespan 정상 작동)
     # volumes:
     #   - ./crawler:/app

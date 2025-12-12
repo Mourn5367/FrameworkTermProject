@@ -8,6 +8,7 @@ from app.services.dcinside_crawler import DCInsideCrawler
 from app.services.arca_crawler_playwright import ArcaLiveCrawlerPlaywright
 from app.services.llm_service import LLMService
 from app.services.info_post_service import InfoPostService
+from app.services.chat_service import ChatService
 from datetime import datetime, timedelta, timezone
 import base64
 
@@ -36,6 +37,11 @@ router = APIRouter()
 # Pydantic 모델
 class RagQueryRequest(BaseModel):
     question: str
+
+
+class ChatRequest(BaseModel):
+    session_id: str
+    query: str
 
 
 @router.get("/health")
@@ -358,4 +364,73 @@ async def crawl_info_posts(
         raise HTTPException(
             status_code=500,
             detail=f"정보글 크롤링 실패: {str(e)}"
+        )
+
+
+@router.post("/chat")
+async def chat(request: ChatRequest):
+    """
+    사용자별 채팅 엔드포인트 (세션 기반)
+
+    Args:
+        request: {
+            "session_id": "사용자 세션 ID",
+            "query": "사용자 질문"
+        }
+
+    Returns:
+        {
+            "answer": str,  # LLM 응답
+            "session_id": str,  # 세션 ID
+            "timestamp": str  # 응답 시간
+        }
+
+    Examples:
+        curl -X POST "http://localhost:8000/api/chat" \
+             -H "Content-Type: application/json" \
+             -d '{"session_id": "user_123", "query": "크루세이더 딜러 빌드 추천해줘"}'
+    """
+    try:
+        if not request.query or not request.query.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="질문을 입력해주세요."
+            )
+
+        # 채팅 서비스 초기화
+        chat_service = ChatService()
+
+        # 채팅 히스토리 조회
+        history = await chat_service.get_chat_history(request.session_id)
+
+        # LLM 서비스 초기화 및 질의
+        llm_service = LLMService()
+        result = await llm_service.query(request.query, chat_history=history)
+
+        # 채팅 히스토리 저장 (사용자 질문 + LLM 응답)
+        await chat_service.save_message(
+            session_id=request.session_id,
+            role="user",
+            content=request.query
+        )
+        await chat_service.save_message(
+            session_id=request.session_id,
+            role="assistant",
+            content=result.get("answer", "응답을 생성할 수 없습니다.")
+        )
+
+        return {
+            "answer": result.get("answer", "응답을 생성할 수 없습니다."),
+            "session_id": request.session_id,
+            "timestamp": datetime.now(KST).isoformat()
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"채팅 처리 실패: {str(e)}"
         )

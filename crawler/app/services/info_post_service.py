@@ -5,8 +5,18 @@
 from typing import List
 from app.services.info_post_crawler import InfoPostCrawler
 from app.services.vector_db_service import VectorDBService
-from app.database import db
-from app.models.post import CommunityPost
+from app.database import get_database
+from app.models.info_post import InfoPost
+
+# Vector DB 서비스 싱글톤 (전역 인스턴스)
+_vector_db_instance = None
+
+def get_vector_db():
+    """Vector DB 서비스 싱글톤 인스턴스 반환"""
+    global _vector_db_instance
+    if _vector_db_instance is None:
+        _vector_db_instance = VectorDBService(persist_directory="/app/chroma_db")
+    return _vector_db_instance
 
 
 class InfoPostService:
@@ -21,12 +31,12 @@ class InfoPostService:
 
     def __init__(self):
         self.crawler = InfoPostCrawler()
-        self.vector_db = VectorDBService(persist_directory="./chroma_db")
+        self.vector_db = get_vector_db()  # 싱글톤 인스턴스 사용
 
     async def crawl_and_embed(
         self,
         gallery_id: str = "dfip",
-        days: int = 30,
+        days: int = 7,
         max_pages: int = 100
     ) -> dict:
         """
@@ -96,17 +106,18 @@ class InfoPostService:
             ]
         }
 
-    async def _save_to_mongodb(self, posts: List[CommunityPost]) -> int:
+    async def _save_to_mongodb(self, posts: List[InfoPost]) -> int:
         """
-        MongoDB에 정보글 저장 (upsert)
+        MongoDB에 정보글 저장 (upsert) - info_posts 컬렉션 사용
 
         Args:
-            posts: CommunityPost 목록
+            posts: InfoPost 목록
 
         Returns:
             저장된 게시글 수
         """
-        collection = db.community_posts
+        db = get_database()
+        collection = db.info_posts  # 별도 컬렉션 사용
         saved_count = 0
 
         for post in posts:

@@ -29,16 +29,15 @@ class VectorDBService:
         self.persist_directory = persist_directory
 
         # ChromaDB 클라이언트 (영구 저장)
-        self.chroma_client = chromadb.Client(Settings(
-            persist_directory=persist_directory,
-            anonymized_telemetry=False
-        ))
+        self.chroma_client = chromadb.PersistentClient(
+            path=persist_directory,
+            settings=Settings(anonymized_telemetry=False)
+        )
 
         # Collection 이름: dnf_info_posts
         self.collection_name = "dnf_info_posts"
 
         # 한국어 임베딩 모델 (jhgan/ko-sroberta-multitask)
-        # 현업 표준: 한국어 성능 최고 (KLUE-STS 93.5점)
         print("📦 임베딩 모델 로딩 중... (jhgan/ko-sroberta-multitask)")
         self.embedding_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
         print("✅ 임베딩 모델 로드 완료")
@@ -93,7 +92,8 @@ class VectorDBService:
                 "upvote_count": post.upvote_count or 0,
                 "view_count": post.view_count or 0,
                 "comment_count": post.comment_count or 0,
-                "board_name": post.board_name or "Unknown",
+                "gallery_id": getattr(post, "gallery_id", "Unknown"),
+                "category": getattr(post, "category", "Unknown"),
                 "crawl_session_id": post.crawl_session_id or ""
             })
 
@@ -164,7 +164,7 @@ class VectorDBService:
                 "similarity": 1 / (1 + results['distances'][0][i])  # 0~1 사이 변환
             }
 
-            # 추천수 기반 점수 부스트 (현업 방식)
+            # 추천수 기반 점수 부스트
             if boost_by_upvote:
                 upvote_count = result['metadata'].get('upvote_count', 0)
                 # 공식: score = similarity * (1 + log10(upvote_count + 1) * 0.2)

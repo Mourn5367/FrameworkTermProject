@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 import asyncio
-from app.models.post import CommunityPost
+from app.models.info_post import InfoPost
 
 
 class InfoPostCrawler:
@@ -30,7 +30,7 @@ class InfoPostCrawler:
         days: int = 30,
         max_pages: int = 100,
         flair_keyword: str = "📚정보"
-    ) -> List[CommunityPost]:
+    ) -> List[InfoPost]:
         """
         '📚정보' 말머리 게시글만 크롤링
 
@@ -41,7 +41,7 @@ class InfoPostCrawler:
             flair_keyword: 말머리 키워드 (기본: 📚정보)
 
         Returns:
-            List[CommunityPost]: 크롤링된 정보 게시글 목록 (추천수 포함)
+            List[InfoPost]: 크롤링된 정보 게시글 목록 (추천수 포함)
         """
 
         now_kst = datetime.now(self.kst)
@@ -65,46 +65,47 @@ class InfoPostCrawler:
         all_posts = []
         found_cutoff = False
 
-        # 페이지별 크롤링 (순차 처리 - Rate Limiting 고려)
-        for page in range(1, max_pages + 1):
+        # 페이지별 크롤링 (병렬 처리 - 5페이지씩 배치)
+        page_batch_size = 5
+
+        for batch_start in range(1, max_pages + 1, page_batch_size):
             if found_cutoff:
                 break
 
-            url_params["page"] = page
+            batch_end = min(batch_start + page_batch_size, max_pages + 1)
+            pages = list(range(batch_start, batch_end))
 
-            try:
-                async with httpx.AsyncClient(timeout=15.0) as client:
-                    response = await client.get(
-                        f"{self.base_url}/mgallery/board/lists",
-                        params=url_params,
-                        headers=self.headers
-                    )
-                    response.raise_for_status()
+            print(f"\n📦 페이지 {batch_start}~{batch_end-1} 병렬 크롤링...")
 
-                    soup = BeautifulSoup(response.text, "lxml")
-                    page_posts = self._parse_info_posts(soup, gallery_id, crawl_session_id, cutoff_time)
+            # 여러 페이지 동시 크롤링
+            tasks = [
+                self._crawl_single_page(gallery_id, page, url_params, crawl_session_id, cutoff_time)
+                for page in pages
+            ]
+            results = await asyncio.gather(*tasks)
 
-                    if not page_posts:
-                        print(f"   ⏹️  페이지 {page}: 게시글 없음, 종료")
+            # 결과 합치기 및 시간 필터링
+            for page_posts in results:
+                if not page_posts:
+                    continue
+
+                for post in page_posts:
+                    if post.posted_at and post.posted_at < cutoff_time:
+                        found_cutoff = True
+                        print(f"   ⏹️  {days}일 이전 게시글 발견, 수집 종료")
                         break
+                    all_posts.append(post)
 
-                    # 시간 필터링 체크
-                    for post in page_posts:
-                        if post.posted_at and post.posted_at < cutoff_time:
-                            found_cutoff = True
-                            print(f"   ⏹️  페이지 {page}: {days}일 이전 게시글 발견, 종료")
-                            break
-                        all_posts.append(post)
+                if found_cutoff:
+                    break
 
-                    print(f"   ✓ 페이지 {page}: {len(page_posts)}개 수집 (총 {len(all_posts)}개)")
+            if found_cutoff:
+                break
 
-                    # Rate Limiting
-                    await asyncio.sleep(2)
+            print(f"   ✓ 배치 완료: {len(all_posts)}개 수집")
 
-            except Exception as e:
-                print(f"   ❌ 페이지 {page} 실패: {e}")
-                await asyncio.sleep(5)
-                continue
+            # Rate Limiting (배치 단위)
+            await asyncio.sleep(2)
 
         if not all_posts:
             print(f"\n⚠️  [정보글 크롤러] 수집된 게시글 없음")
@@ -112,9 +113,9 @@ class InfoPostCrawler:
 
         print(f"\n📝 [정보글 크롤러] 본문 및 추천수 수집 시작... (총 {len(all_posts)}개)")
 
-        # 본문 + 추천수 병렬 수집 (10개씩 배치)
+        # 본문 + 추천수 병렬 수집 (20개씩 배치)
         async with httpx.AsyncClient(timeout=15.0) as client:
-            batch_size = 10
+            batch_size = 20
             for i in range(0, len(all_posts), batch_size):
                 batch = all_posts[i:i+batch_size]
 
@@ -136,22 +137,57 @@ class InfoPostCrawler:
 
         return all_posts
 
+    async def _crawl_single_page(
+        self,
+        gallery_id: str,
+        page: int,
+        url_params: dict,
+        crawl_session_id: str,
+        cutoff_time: datetime
+    ) -> List[InfoPost]:
+        """단일 페이지 크롤링 (병렬 처리용 헬퍼)"""
+        params = url_params.copy()
+        params["page"] = page
+
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/mgallery/board/lists",
+                    params=params,
+                    headers=self.headers
+                )
+                response.raise_for_status()
+
+                soup = BeautifulSoup(response.text, "lxml")
+                posts = self._parse_info_posts(soup, gallery_id, crawl_session_id, cutoff_time)
+
+                return posts
+
+        except Exception as e:
+            print(f"   ❌ 페이지 {page} 실패: {e}")
+            return []
+
     def _parse_info_posts(
         self,
         soup: BeautifulSoup,
         gallery_id: str,
         crawl_session_id: str,
         cutoff_time: datetime
-    ) -> List[CommunityPost]:
+    ) -> List[InfoPost]:
         """게시글 목록 파싱 (말머리 필터링 적용)"""
         posts = []
-        rows = soup.select(".gall_list tbody tr.ub-content")
+        rows = soup.select("tr.ub-content.us-post")
 
         for row in rows:
             try:
-                # 공지 제외
-                if "notice" in row.get("class", []):
+                # 말머리 확인: gall_subject에 "📚정보" 또는 "정보" 포함되어야 함
+                subject_elem = row.select_one("td.gall_subject")
+                if not subject_elem:
                     continue
+
+                subject_text = subject_elem.get_text(strip=True)
+                if "정보" not in subject_text or "공지" in subject_text:
+                    continue  # "📚정보"만 허용, "공지"는 제외
 
                 # 제목 추출
                 title_elem = row.select_one(".gall_tit a")
@@ -162,6 +198,14 @@ class InfoPostCrawler:
                 post_url = title_elem.get("href", "")
                 if post_url.startswith("/"):
                     post_url = self.base_url + post_url
+
+                # 광고/외부 URL 필터링
+                if any(ad_domain in post_url for ad_domain in ["javascript:", "addc.dcinside.com", "link.coupang.com", "event.dcinside.com"]):
+                    continue
+
+                # 디시인사이드 내부 게시글만
+                if not ("gall.dcinside.com" in post_url or post_url.startswith("/")):
+                    continue
 
                 # 작성자
                 author_elem = row.select_one(".gall_writer")
@@ -200,18 +244,18 @@ class InfoPostCrawler:
                     except:
                         pass
 
-                post = CommunityPost(
+                post = InfoPost(
                     title=title,
                     content="",  # 나중에 채움
                     author=author,
                     url=post_url,
                     posted_at=posted_at,
                     crawl_session_id=crawl_session_id,
-                    board_name=f"디시인사이드 {gallery_id} (정보글)",
+                    gallery_id=gallery_id,
+                    category=subject_text,  # 실제 말머리 텍스트 (📚정보)
                     view_count=view_count,
                     comment_count=comment_count,
                     upvote_count=upvote_count,
-                    comments=[],
                 )
 
                 posts.append(post)
@@ -224,53 +268,71 @@ class InfoPostCrawler:
     async def _fetch_full_content(
         self,
         client: httpx.AsyncClient,
-        post: CommunityPost,
+        post: InfoPost,
         idx: int,
-        total: int
+        total: int,
+        max_retries: int = 3
     ):
-        """게시글 본문 + 추천수 수집"""
-        try:
-            response = await client.get(post.url, headers=self.headers)
-            response.raise_for_status()
+        """게시글 본문 + 추천수 수집 (재시도 로직 포함)"""
+        for attempt in range(max_retries):
+            try:
+                response = await client.get(post.url, headers=self.headers)
+                response.raise_for_status()
 
-            soup = BeautifulSoup(response.text, "lxml")
+                soup = BeautifulSoup(response.text, "lxml")
 
-            # 본문
-            content_elem = soup.select_one(".write_div")
-            if content_elem:
-                post.content = content_elem.get_text(separator="\n", strip=True)
+                # 본문
+                content_elem = soup.select_one(".write_div")
+                if content_elem:
+                    post.content = content_elem.get_text(separator="\n", strip=True)
 
-            # 추천수 (상세 페이지에서 정확한 값)
-            recommend_elem = soup.select_one(".up_num span.up_num")
-            if not recommend_elem:
-                recommend_elem = soup.select_one(".recommend_box .up")
+                # 추천수 (상세 페이지에서 정확한 값)
+                recommend_elem = soup.select_one(".up_num span.up_num")
+                if not recommend_elem:
+                    recommend_elem = soup.select_one(".recommend_box .up")
 
-            if recommend_elem:
-                try:
-                    recommend_text = recommend_elem.get_text(strip=True)
-                    post.upvote_count = int(recommend_text)
-                except:
-                    pass
+                if recommend_elem:
+                    try:
+                        recommend_text = recommend_elem.get_text(strip=True)
+                        post.upvote_count = int(recommend_text)
+                    except:
+                        pass
 
-            if idx % 10 == 0 or idx == total:
-                print(f"      📊 수집 진행: {idx}/{total} (추천 {post.upvote_count}개)")
+                if idx % 10 == 0 or idx == total:
+                    print(f"      📊 수집 진행: {idx}/{total} (추천 {post.upvote_count}개)")
 
-        except Exception as e:
-            post.content = ""
-            print(f"      ❌ 본문 수집 실패: {post.url[:50]}... - {e}")
+                # 성공 시 루프 탈출
+                return
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    # 재시도 대기 (exponential backoff)
+                    wait_time = 2 ** attempt
+                    await asyncio.sleep(wait_time)
+                else:
+                    # 최종 실패
+                    post.content = ""
+                    print(f"      ❌ 본문 수집 실패 ({max_retries}회 시도): {post.url[:50]}... - {e}")
 
     def _parse_date(self, date_str: str) -> datetime:
         """날짜 파싱 (KST 기준)"""
         now_kst = datetime.now(self.kst)
 
         try:
-            # "25.01.07" 형태 (날짜만)
-            if "." in date_str and len(date_str.split(".")) == 3:
-                year, month, day = date_str.split(".")
+            # "25/01/07" 또는 "25.01.07" 형태 (전체 날짜)
+            if ("." in date_str or "/" in date_str) and len(date_str.split("." if "." in date_str else "/")) == 3:
+                parts = date_str.replace("/", ".").split(".")
+                year, month, day = parts
                 year = int("20" + year)
                 month = int(month)
                 day = int(day)
                 return datetime(year, month, day, tzinfo=self.kst)
+
+            # "12.09" 또는 "12/09" 형태 (월.일, 올해)
+            elif ("." in date_str or "/" in date_str) and len(date_str.split("." if "." in date_str else "/")) == 2:
+                parts = date_str.replace("/", ".").split(".")
+                month, day = parts
+                return datetime(now_kst.year, int(month), int(day), tzinfo=self.kst)
 
             # "12:34" 형태 (오늘 시간)
             elif ":" in date_str:
