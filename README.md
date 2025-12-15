@@ -208,7 +208,7 @@ docker-compose down -v
 
 ## 📁 프로젝트 구조
 
-```
+
 Next_Spring/
 ├── frontend/                      # Next.js 16 Frontend
 │   ├── app/
