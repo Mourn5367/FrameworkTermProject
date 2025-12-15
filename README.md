@@ -589,3 +589,7 @@ docker-compose run --rm crawler python crawl_500_posts.py
 
 
 ---
+
+## 시연 영상
+
+[![유튜브 영상](https://img.youtube.com/vi/58X_STIIVes/hqdefault.jpg)](https://youtu.be/58X_STIIVes)
