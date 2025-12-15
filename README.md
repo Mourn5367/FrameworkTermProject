@@ -21,7 +21,6 @@
 - [환경 변수 설정](#-환경-변수-설정)
 - [프로젝트 구조](#-프로젝트-구조)
 - [API 문서](#-api-문서)
-- [개발 가이드](#-개발-가이드)
 - [라이선스](#-라이선스)
 
 ---
@@ -63,7 +62,7 @@
 - **세트 아이템 통계**: 각 캐릭터의 모든 슬롯에서 가장 많이 등장하는 세트 집계
 - **융합석 통계**: 방어구 5부위, 악세 3부위, 특수 융합석 분류
 - **VP 스킬 통계**: 진화/강화 스킬 + 세트/칭호/무기 튠 태그 분석
-- **대량 수집**: 랭킹 API로 직업별 상위 500명 장비 자동 수집
+- **대량 수집**: 랭킹 API로 직업별 상위 100명 장비 자동 수집
 
 ### 4. LLM 챗봇 (RAG) 🤖
 
@@ -107,7 +106,6 @@
 ### Crawler
 - **Framework**: FastAPI 0.115+
 - **Language**: Python 3.11+
-- **Browser Automation**: Playwright (Chromium)
 - **HTML Parsing**: Beautiful Soup 4
 - **NLP**: KoNLPy (Okt), WordCloud
 - **LLM**: Ollama (qwen3:4b)
@@ -120,11 +118,11 @@
 ## 🏗️ 시스템 아키텍처
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  Frontend (Next.js)  │  Backend (Spring)  │  Crawler (FastAPI)  │  AI (Ollama)  │
-├─────────────────────────────────────────────────────────────┤
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│  Frontend (Next.js)   │  Backend (Spring)   │  Crawler (FastAPI)    │    AI (Ollama)     │
+├──────────────────────────────────────────────────────────────────────────────────────────┤
 │  Docker Compose (7 Services: Frontend, Backend, Crawler, MongoDB, MySQL, Redis, Ollama)  │
-└─────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **데이터 흐름:**
@@ -132,8 +130,6 @@
 2. **캐릭터**: Next.js → Spring Boot → 네오플 API → Redis 캐싱 (5분) → MongoDB
 3. **크롤링**: FastAPI Scheduler (1시간) → DC/Arca → MongoDB → ChromaDB 임베딩
 4. **챗봇**: Next.js → FastAPI → Ollama (Function Calling) → ChromaDB → Ollama → Next.js
-
-자세한 내용: [system_architecture.html](./system_architecture.html) 참고
 
 ---
 
@@ -462,73 +458,7 @@ POST /api/crawl/trigger?site=both
 ```
 
 **파라미터**:
-- `site`: `dcinside`, `arca`, `both` (기본값: `both`)
-
----
-
-## 🧑‍💻 개발 가이드
-
-### 로컬 개발 (Docker 없이)
-
-#### Frontend 실행
-```bash
-cd frontend
-npm install
-npm run dev
-# http://localhost:3000
-```
-
-#### Backend 실행
-```bash
-cd backend
-./gradlew bootRun
-# http://localhost:8080
-```
-
-#### Crawler 실행
-```bash
-cd crawler
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-# http://localhost:8000
-```
-
-### 테스트 실행
-
-#### Backend 테스트
-```bash
-cd backend
-./gradlew test
-```
-
-#### Frontend 빌드
-```bash
-cd frontend
-npm run build
-npm run start
-```
-
-### 데이터베이스 초기화
-
-```bash
-# MongoDB 초기화
-docker-compose exec mongodb mongosh -u admin -p your-password --eval "db.dropDatabase()"
-
-# MySQL 초기화
-docker-compose exec mysql mysql -u root -p -e "DROP DATABASE dnf_insight; CREATE DATABASE dnf_insight;"
-```
-
-### 워드클라우드 생성
-
-```bash
-docker-compose run --rm crawler python make_wordcloud.py
-```
-
-### 대량 크롤링 (500개 게시글)
-
-```bash
-docker-compose run --rm crawler python crawl_500_posts.py
-```
+- `site`: `dcinside`
 
 ---
 
@@ -585,7 +515,6 @@ docker-compose run --rm crawler python crawl_500_posts.py
 
 - **API 키 관리**: Redis 기반 Rate Limiting (1초/1분/1시간 단위)
 - **CORS 설정**: Spring WebConfig에서 허용 도메인 관리
-
 
 
 ---
