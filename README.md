@@ -18,7 +18,6 @@
 - [기술 스택](#-기술-스택)
 - [시스템 아키텍처](#-시스템-아키텍처)
 - [시작하기](#-시작하기)
-- [환경 변수 설정](#-환경-변수-설정)
 - [프로젝트 구조](#-프로젝트-구조)
 - [API 문서](#-api-문서)
 - [라이선스](#-라이선스)
@@ -205,60 +204,6 @@ docker-compose down -v
 
 ---
 
-## 🔧 환경 변수 설정
-
-### `.env` 파일 예시
-
-```bash
-# ===== 네오플 던파 API =====
-# 여러 키는 쉼표로 구분 (예: key1,key2,key3)
-DNF_API_KEYS=your-api-key-1,your-api-key-2
-DNF_API_BASE_URL=https://api.neople.co.kr
-DNF_IMAGE_BASE_URL=https://img-api.neople.co.kr
-
-# Rate Limiting (네오플 기본값)
-DNF_API_RATE_LIMIT_PER_SECOND=1000
-DNF_API_RATE_LIMIT_PER_MINUTE=60000
-DNF_API_RATE_LIMIT_PER_HOUR=3600000
-
-# 캐시 TTL (초 단위)
-DNF_API_CACHE_TIMELINE_TTL=300
-DNF_API_CACHE_CHARACTER_TTL=300
-
-# ===== 데이터베이스 =====
-# MongoDB
-MONGO_INITDB_ROOT_USERNAME=admin
-MONGO_INITDB_ROOT_PASSWORD=your-mongo-password
-MONGO_INITDB_DATABASE=dnf_insight
-
-# MySQL
-MYSQL_ROOT_PASSWORD=your-mysql-root-password
-MYSQL_DATABASE=dnf_insight
-MYSQL_USER=dnf_user
-MYSQL_PASSWORD=your-mysql-password
-
-# Redis
-REDIS_PASSWORD=your-redis-password
-
-# ===== Spring Boot =====
-SPRING_PROFILES_ACTIVE=dev
-JWT_SECRET=your-jwt-secret-key-minimum-256-bits
-
-# ===== FastAPI Crawler =====
-CRAWLER_INTERVAL_MINUTES=60
-DCINSIDE_ENABLED=true
-DCINSIDE_MAX_PAGES=3
-ARCA_ENABLED=true
-ARCA_MAX_PAGES=2
-
-# ===== Ollama =====
-OLLAMA_BASE_URL=http://ollama:11434
-OLLAMA_MODEL=qwen3:4b
-
-# ===== 기타 =====
-NODE_ENV=development
-API_URL=http://localhost:8080
-NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
 ### API 키 발급 방법
@@ -266,7 +211,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 1. [네오플 개발자 센터](https://developers.neople.co.kr) 접속
 2. 회원가입 및 로그인
 3. "API Key 발급" 메뉴에서 신규 발급
-4. 발급받은 키를 `.env`의 `DNF_API_KEYS`에 입력
+4. 발급받은 키를 `application.yml`의 `keys`에 입력
 
 **💡 Tip**: Rate Limiting을 피하기 위해 여러 개의 API 키를 쉼표로 구분하여 등록하세요.
 
