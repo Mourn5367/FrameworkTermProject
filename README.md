@@ -147,18 +147,7 @@ git clone https://github.com/your-username/Next_Spring.git
 cd Next_Spring
 ```
 
-### 2. 환경 변수 설정
-
-루트 디렉토리에 `.env` 파일 생성:
-
-```bash
-cp .env.example .env
-nano .env
-```
-
-필수 환경 변수 입력 (자세한 내용은 [환경 변수 설정](#-환경-변수-설정) 참고)
-
-### 3. Docker Compose 실행
+### 2. Docker Compose 실행
 
 ```bash
 # 전체 스택 빌드 및 실행
@@ -171,14 +160,14 @@ docker-compose up -d
 docker-compose up frontend backend
 ```
 
-### 4. 접속
+### 3. 접속
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
 - **Crawler API**: http://localhost:8000
 - **Ollama API**: http://localhost:11434
 
-### 5. 로그 확인
+### 4. 로그 확인
 
 ```bash
 # 전체 로그
@@ -189,7 +178,7 @@ docker-compose logs -f backend
 docker-compose logs -f crawler
 ```
 
-### 6. 중지 및 삭제
+### 5. 중지 및 삭제
 
 ```bash
 # 중지
